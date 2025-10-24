@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      gridstack:
+        specifier: ^12.3.3
+        version: 12.3.3
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -268,6 +271,9 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
+
+  gridstack@12.3.3:
+    resolution: {integrity: sha512-Bboi4gj7HXGnx1VFXQNde4Nwi5srdUSuCCnOSszKhFjBs8EtMEWhsKX02BjIKkErq/FjQUkNUbXUYeQaVMQ0jQ==}
 
   lightningcss-android-arm64@1.30.2:
     resolution: {integrity: sha512-BH9sEdOCahSgmkVhBLeU7Hc9DWeZ1Eb6wNS6Da8igvUwAe0sqROHddIlvU06q3WyXVEOYDZ6ykBZQnjTbmo4+A==}
@@ -653,6 +659,8 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
+
+  gridstack@12.3.3: {}
 
   lightningcss-android-arm64@1.30.2:
     optional: true
