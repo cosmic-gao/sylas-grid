@@ -1,4 +1,4 @@
-import type { GridInstanceSpec, GridOptions } from "./type"
+import type { GridInstanceSpec, GridItemOptions, GridItem, GridOptions } from "./type"
 
 import { GridStack } from "gridstack"
 import { useId } from "./useId"
@@ -11,6 +11,7 @@ export class GridInstance implements GridInstanceSpec {
     public container: HTMLElement;
     public gridstack: GridStack;
     public options: GridOptions
+    public items: Map<string, GridItem> = new Map()
 
     private initialized: boolean = false
 
@@ -19,6 +20,8 @@ export class GridInstance implements GridInstanceSpec {
         this.options = this.refine(options)
 
         this.gridstack = GridStack.init(this.options, container)
+
+        this.init()
     }
 
     public init() {
@@ -26,6 +29,15 @@ export class GridInstance implements GridInstanceSpec {
 
         this.initialized = true
         this.container.classList.add('sylas-grid')
+        this.container.setAttribute('data-grid-id', this.id)
+    }
+
+    public addItem(element: HTMLElement, options: GridItemOptions): GridItem {
+        this.gridstack.addWidget(element)
+
+        const gridItem = {}
+
+        return gridItem
     }
 
     private refine(options?: GridOptions) {

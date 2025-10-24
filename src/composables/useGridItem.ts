@@ -6,7 +6,6 @@ import { GridInstance } from "../core/GridInstance"
 export function useGridItem() {
     const itemRef = ref<HTMLElement>()
     const gridItem = ref<GridItem>()
-
     const gridInstance = inject<Ref<GridInstance>>('grid-instance')
 
     onMounted(() => {
