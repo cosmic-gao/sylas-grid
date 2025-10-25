@@ -1,3 +1,5 @@
-import { customAlphabet } from "nanoid";
+import { nanoid } from "nanoid";
 
-export const useId = customAlphabet("__sylas_grid__", 16)
+export const SCOPE_ALPHABET = "__sylas_grid__"
+
+export const useId = (size: number = 12) => SCOPE_ALPHABET + nanoid(size)
