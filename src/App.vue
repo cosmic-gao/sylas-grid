@@ -1,7 +1,8 @@
-<script setup lang="ts">
-import { GridEngine } from "./core"
+<script lang="ts">
+</script>
 
-new GridEngine()
+<script setup lang="ts">
+
 </script>
 
 <template>
