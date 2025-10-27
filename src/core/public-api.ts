@@ -1,4 +1,5 @@
 export * from "./use-id"
 export * from "./event-bus"
 export * from "./grid-engine"
+export * from "./grid-factory"
 export * from "./layout-engine"

@@ -1,5 +1,6 @@
 import { type GridStackOptions, GridStack } from "gridstack"
 import { useId } from "./use-id"
+import { EventBus } from "./event-bus"
 
 export interface GridEngineSpec { }
 
@@ -9,6 +10,8 @@ export class GridEngine implements GridEngineSpec {
     private static GRID_ENGINE_OPTIONS: GridEngineOptions = {}
 
     public readonly id: string = useId()
+    public readonly mitt: EventBus = new EventBus()
+
     public container: HTMLElement;
     public options: GridEngineOptions;
     public gridstack: GridStack;

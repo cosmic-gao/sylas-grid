@@ -34,7 +34,7 @@ export interface Emitter<E extends Record<EventType, unknown>> {
     emit<K extends keyof E>(type: undefined extends E[K] ? K : never): void;
 }
 
-export class EventBus<E extends Record<EventType, unknown>> implements Emitter<E> {
+export class EventBus<E extends Record<EventType, unknown> = Record<string, unknown>> implements Emitter<E> {
     public all: EventCallbackMap<E> = new Map()
 
     public on<K extends keyof E>(type: K | '*', callback: EventCallback<E[K]> | WildcardCallback<E>) {
