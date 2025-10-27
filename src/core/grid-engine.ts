@@ -1,6 +1,17 @@
-import { type GridStackOptions, GridStack } from "gridstack"
+import { type GridStackOptions, type GridStackWidget, GridStack } from "gridstack"
 import { useId } from "./use-id"
 import { EventBus } from "./event-bus"
+
+export interface GridItemOptions extends GridStackWidget {
+    /** widget position x (default?: 0) */
+    x?: number;
+    /** widget position y (default?: 0) */
+    y?: number;
+    /** widget dimension width (default?: 1) */
+    w?: number;
+    /** widget dimension height (default?: 1) */
+    h?: number;
+}
 
 export interface GridEngineSpec { }
 
@@ -27,8 +38,13 @@ export class GridEngine implements GridEngineSpec {
         this.initialize();
     }
 
-    public addItem(element: HTMLElement) {
-        this.gridstack.makeWidget(element)
+    public addItem(element: HTMLElement, options?: GridItemOptions) {
+        const el = GridStack.getElement(element);
+                console.log(el, el.gridstackNode)
+
+        if (el && el.gridstackNode) return
+        console.log(el, el.gridstackNode)
+        this.gridstack.makeWidget(element, options)
     }
 
     public updateItem() { }
