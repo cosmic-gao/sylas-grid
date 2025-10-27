@@ -40,14 +40,14 @@ export class GridEngine implements GridEngineSpec {
 
     public addItem(element: HTMLElement, options?: GridItemOptions) {
         const el = GridStack.getElement(element);
-                console.log(el, el.gridstackNode)
+        console.log(el, el.gridstackNode)
 
         if (el && el.gridstackNode) return
         console.log(el, el.gridstackNode)
         this.gridstack.makeWidget(element, options)
     }
 
-    public updateItem() { }
+    public updateItem(element: HTMLElement, options?: GridItemOptions) { }
 
     public removeItem() { }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, ref, watch, watchEffect } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { type GridItemProps } from './grid.props';
 import { GRID_ITEM_ATTRS } from "./grid.const"
 import { useGrid } from "./grid.context"
@@ -25,6 +25,11 @@ const properties = computed(() => ({ ...gridAttrs.value }))
 watch(engine, () => {
   if (!itemRef.value || !engine.value) return
   engine.value.addItem(itemRef.value, props)
+}, { flush: 'post', once: true })
+
+watch(props, () => {
+  if (!itemRef.value || !engine.value) return
+  engine.value.updateItem(itemRef.value, props)
 })
 </script>
 
