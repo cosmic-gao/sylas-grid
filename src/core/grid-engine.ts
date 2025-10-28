@@ -27,7 +27,7 @@ export class GridEngine implements GridEngineSpec {
     public readonly id: string = useId()
     public readonly mitt: EventBus = new EventBus()
 
-    public container: HTMLElement;
+    public el: HTMLElement;
     public options: GridEngineOptions;
     public gridstack: GridStack;
 
@@ -37,24 +37,24 @@ export class GridEngine implements GridEngineSpec {
 
     private readonly dragManager: DragManager;
 
-    public constructor(container: HTMLElement, options: GridEngineOptions = {}) {
-        this.container = container
+    public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
+        this.el = el
         this.options = this.configure(options);
 
-        this.gridstack = GridStack.init(this.options, this.container)
+        this.gridstack = GridStack.init(this.options, this.el)
 
         this.dragManager = new DragManager(this)
 
         this.initialize();
     }
 
-    public addItem(element: HTMLElement, options?: GridItemOptions): GridItem {
+    public addItem(el: HTMLElement, options?: GridItemOptions): GridItem {
         const gridItem = { ...options } as GridItem
         const id = gridItem.id!
 
         this.flush()
 
-        this.gridstack.addWidget({ ...options, el: element } as GridStackWidget)
+        this.gridstack.addWidget({ ...options, el } as GridStackWidget)
 
         this.gridItems.set(id, gridItem)
 
@@ -90,8 +90,8 @@ export class GridEngine implements GridEngineSpec {
     private initialize() {
         if (this.initialized) return
 
-        this.container.classList.add('sylas-grid')
-        this.container.setAttribute('data-grid-id', this.id)
+        this.el.classList.add('sylas-grid')
+        this.el.setAttribute('data-grid-id', this.id)
         this.initialized = true
     }
 
