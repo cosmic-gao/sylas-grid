@@ -1,5 +1,5 @@
 import { type GridStackOptions, type GridStackWidget, GridStack } from "gridstack"
-import { useId } from "./use-id"
+import { createId } from "./create-id"
 import { EventBus } from "./event-bus"
 import { microtask } from "./microtask";
 import { DragManager } from "./drag-manager";
@@ -103,7 +103,7 @@ export class GridEngine implements GridEngineSpec {
     }
 
     private configure(options: GridEngineOptions): GridEngineOptions {
-        return Object.assign({ id: useId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
+        return Object.assign({ id: createId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
     }
 
     private flush() {

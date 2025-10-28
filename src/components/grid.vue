@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMounted, ref, shallowReactive } from "vue";
-import { useGrid } from "../core"
+import { createGrid } from "../core"
 import { type GridProps } from "./grid.props"
 import { type GridContext, provideGrid } from "./grid.context"
 </script>
@@ -16,7 +16,7 @@ provideGrid(context)
 onMounted(() => {
   if (!gridRef.value) return
 
-  context.engine = useGrid(gridRef.value)
+  context.engine = createGrid(gridRef.value)
 })
 </script>
 
