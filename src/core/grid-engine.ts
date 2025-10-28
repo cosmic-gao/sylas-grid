@@ -1,6 +1,8 @@
 import { type GridStackOptions, type GridStackWidget, GridStack } from "gridstack"
 import { useId } from "./use-id"
 import { EventBus } from "./event-bus"
+import { microtask } from "./microtask";
+import { DragManager } from "./drag-manager";
 
 export interface GridItemOptions extends GridStackWidget {
     /** widget position x (default?: 0) */
@@ -12,6 +14,8 @@ export interface GridItemOptions extends GridStackWidget {
     /** widget dimension height (default?: 1) */
     h?: number;
 }
+
+export interface GridItem extends GridItemOptions { }
 
 export interface GridEngineSpec { }
 
@@ -28,6 +32,10 @@ export class GridEngine implements GridEngineSpec {
     public gridstack: GridStack;
 
     private initialized: boolean = false;
+    private batching: boolean = false;
+    private gridItems: Map<string, GridItem> = new Map()
+
+    private readonly dragManager: DragManager;
 
     public constructor(container: HTMLElement, options: GridEngineOptions = {}) {
         this.container = container
@@ -35,23 +43,47 @@ export class GridEngine implements GridEngineSpec {
 
         this.gridstack = GridStack.init(this.options, this.container)
 
+        this.dragManager = new DragManager(this)
+
         this.initialize();
     }
 
-    public addItem(element: HTMLElement, options?: GridItemOptions) {
-        const el = GridStack.getElement(element);
-        console.log(el, el.gridstackNode)
+    public addItem(element: HTMLElement, options?: GridItemOptions): GridItem {
+        const gridItem = { ...options } as GridItem
+        const id = gridItem.id!
 
-        if (el && el.gridstackNode) return
-        console.log(el, el.gridstackNode)
-        this.gridstack.makeWidget(element, options)
+        this.flush()
+
+        this.gridstack.addWidget({ ...options, el: element } as GridStackWidget)
+
+        this.gridItems.set(id, gridItem)
+
+        return gridItem
     }
 
-    public updateItem(element: HTMLElement, options?: GridItemOptions) { }
+    public updateItem(id: string, options: GridItemOptions) {
+        const gridItem = this.gridItems.get(id)
+        if (!gridItem) return
 
-    public removeItem() { }
+        this.flush()
+        this.gridstack.update(id, options)
+
+        Object.assign(gridItem, options)
+    }
+
+    public removeItem(id: string) {
+        const gridItem = this.gridItems.get(id)
+        if (!gridItem) return
+
+        this.flush();
+
+        this.gridstack.removeWidget(id)
+        this.gridItems.delete(id)
+    }
 
     public destroy() {
+        this.dragManager.destroy()
+
         this.gridstack.destroy(false)
     }
 
@@ -65,5 +97,17 @@ export class GridEngine implements GridEngineSpec {
 
     private configure(options: GridEngineOptions): GridEngineOptions {
         return Object.assign({}, GridEngine.GRID_ENGINE_OPTIONS, options)
+    }
+
+    private flush() {
+        if (!this.batching) {
+            this.gridstack.batchUpdate();
+            this.batching = true;
+
+            microtask(() => {
+                this.gridstack.batchUpdate(false);
+                this.batching = false;
+            });
+        }
     }
 }

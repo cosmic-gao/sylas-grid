@@ -1,5 +1,6 @@
 <script lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { type GridItem } from "../core"
 import { type GridItemProps } from './grid.props';
 import { GRID_ITEM_ATTRS } from "./grid.const"
 import { useGrid } from "./grid.context"
@@ -9,6 +10,7 @@ import { useGrid } from "./grid.context"
 const props = defineProps<GridItemProps>();
 
 const itemRef = ref<HTMLElement>()
+const gridItem = ref<GridItem>()
 
 const context = useGrid()
 
@@ -16,20 +18,26 @@ const engine = computed(() => context.engine!)
 
 const gridAttrs = computed(() =>
   Object.fromEntries(
-    GRID_ITEM_ATTRS.map(key => [`gs-${key}`, props[key]])
+    Object.entries(GRID_ITEM_ATTRS)
+      .map(([key, attr]) => [`gs-${attr}`, props[key as keyof GridItemProps]])
   )
 )
 
 const properties = computed(() => ({ ...gridAttrs.value }))
 
-watch(engine, () => {
-  if (!itemRef.value || !engine.value) return
-  engine.value.addItem(itemRef.value, props)
-}, { flush: 'post', once: true })
+onMounted(() => {
+  if (!itemRef.value || !engine?.value) return
+  gridItem.value = engine.value.addItem(itemRef.value, props)
+})
 
 watch(props, () => {
-  if (!itemRef.value || !engine.value) return
-  engine.value.updateItem(itemRef.value, props)
+  if (!gridItem.value || !engine.value) return
+  engine.value.updateItem(gridItem.value.id!, props)
+})
+
+onUnmounted(() => {
+  if (!gridItem.value || !engine.value) return
+  engine.value.removeItem(gridItem.value.id!)
 })
 </script>
 

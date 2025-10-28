@@ -1,6 +1,7 @@
 export * from "./use-id"
 export * from "./use-grid"
 export * from "./event-bus"
+export * from "./drag-manager"
 export * from "./grid-engine"
 export * from "./grid-factory"
 export * from "./layout-engine"
