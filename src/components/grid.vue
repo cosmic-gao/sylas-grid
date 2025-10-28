@@ -1,10 +1,13 @@
 <script lang="ts">
 import { onMounted, ref, shallowReactive } from "vue";
 import { useGrid } from "../core"
+import { type GridProps } from "./grid.props"
 import { type GridContext, provideGrid } from "./grid.context"
 </script>
 
 <script setup lang="ts">
+defineProps<GridProps>()
+
 const gridRef = ref<HTMLElement>()
 
 const context = shallowReactive<GridContext>({ engine: null })

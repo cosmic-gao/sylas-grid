@@ -19,12 +19,14 @@ export interface GridItem extends GridItemOptions { }
 
 export interface GridEngineSpec { }
 
-export interface GridEngineOptions extends GridStackOptions { }
+export interface GridEngineOptions extends GridStackOptions {
+    id?: string;
+}
 
 export class GridEngine implements GridEngineSpec {
     private static GRID_ENGINE_OPTIONS: GridEngineOptions = {}
 
-    public readonly id: string = useId()
+    public readonly id: string;
     public readonly mitt: EventBus = new EventBus()
 
     public el: HTMLElement;
@@ -40,6 +42,7 @@ export class GridEngine implements GridEngineSpec {
     public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
         this.el = el
         this.options = this.configure(options);
+        this.id = this.options.id!
 
         this.gridstack = GridStack.init(this.options, this.el)
 
@@ -81,6 +84,10 @@ export class GridEngine implements GridEngineSpec {
         this.gridItems.delete(id)
     }
 
+    public getDragManager(): DragManager {
+        return this.dragManager
+    }
+
     public destroy() {
         this.dragManager.destroy()
 
@@ -96,7 +103,7 @@ export class GridEngine implements GridEngineSpec {
     }
 
     private configure(options: GridEngineOptions): GridEngineOptions {
-        return Object.assign({}, GridEngine.GRID_ENGINE_OPTIONS, options)
+        return Object.assign({ id: useId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
     }
 
     private flush() {

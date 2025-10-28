@@ -20,13 +20,13 @@ const onAddWidget = () => {
 <template>
   <button @click="onAddWidget">Add a widget</button>
   <button>Delete the last widget</button>
-  <GridGragSource>
+  <GridGragSource target="dashboard">
     <div style="border: 1px solid #0a59f7;width:70px;height: 70px;background-color: #e6eeff;">
       Add External widget
     </div>
   </GridGragSource>
 
-  <Grid>
+  <Grid name="dashboard">
     <GridItem v-for="item in items" :key="item.id" v-bind="item">{{ item.id }}</GridItem>
   </Grid>
 </template>
