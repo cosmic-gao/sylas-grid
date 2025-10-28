@@ -48,7 +48,7 @@ export class GridEngine implements GridEngineSpec {
 
         this.dragManager = new DragManager(this)
 
-        this.initialize();
+        this.setup();
     }
 
     public addItem(el: HTMLElement, options?: GridItemOptions): GridItem {
@@ -94,7 +94,7 @@ export class GridEngine implements GridEngineSpec {
         this.gridstack.destroy(false)
     }
 
-    private initialize() {
+    private setup() {
         if (this.initialized) return
 
         this.el.classList.add('sylas-grid')
