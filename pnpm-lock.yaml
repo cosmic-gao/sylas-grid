@@ -6,15 +6,15 @@ settings:
 
 overrides:
   vite: npm:rolldown-vite@7.1.14
-  gridstack: link:G:/gridstack.js
+  gridstack: link:F:/gridstack.js
 
 importers:
 
   .:
     dependencies:
       gridstack:
-        specifier: link:G:/gridstack.js
-        version: link:G:/gridstack.js
+        specifier: link:F:/gridstack.js
+        version: link:F:/gridstack.js
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6

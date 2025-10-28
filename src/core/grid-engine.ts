@@ -22,7 +22,7 @@ export interface GridEngineSpec {
 }
 
 export interface GridEngineOptions extends GridStackOptions {
-    name?: string;
+    id?: string;
     dragInOptions?: DDDragOpt;
 }
 
@@ -75,7 +75,7 @@ export class GridEngine implements GridEngineSpec {
     public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
         this.el = el
         this.options = this.configure(options);
-        this.id = this.options.name!
+        this.id = this.options.id!
 
         this.gridstack = GridStack.init(this.options, this.el)
 
@@ -136,7 +136,7 @@ export class GridEngine implements GridEngineSpec {
     }
 
     private configure(options: GridEngineOptions): GridEngineOptions {
-        return Object.assign({ name: createId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
+        return { id: createId(), ...GridEngine.GRID_ENGINE_OPTIONS, ...options }
     }
 
     private flush() {

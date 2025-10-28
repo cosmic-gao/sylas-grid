@@ -6,7 +6,9 @@ import { type GridContext, provideGrid } from "./grid.context"
 </script>
 
 <script setup lang="ts">
-const props = defineProps<GridProps>()
+const props = withDefaults(defineProps<GridProps>(), {
+  options: () => ({})
+})
 
 const gridRef = ref<HTMLElement>()
 
@@ -15,8 +17,7 @@ provideGrid(context)
 
 onMounted(() => {
   if (!gridRef.value) return
-  console.log(props, "props")
-  context.engine = createGrid(gridRef.value, props)
+  context.engine = createGrid(gridRef.value, { ...props.options, id: props.name })
 })
 </script>
 
@@ -27,7 +28,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-@use 'G:/gridstack.js/src/gridstack.scss';
+@use 'F:/gridstack.js/src/gridstack.scss';
 
 .sylas-grid-vue {
   background-color: #f5f5f5;

@@ -3,7 +3,7 @@ import { type GridFactoryOptions, GridFactory } from "./grid-factory"
 
 export interface GridOptions extends GridFactoryOptions { }
 
-export function createGrid(element: HTMLElement | string, options: GridOptions = {}): GridEngine {
+export function createGrid(element: HTMLElement | string,  options: GridOptions = {}): GridEngine {
   const el = typeof element === 'string'
     ? document.querySelector(element) as HTMLElement
     : element

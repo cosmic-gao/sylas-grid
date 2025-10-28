@@ -1,6 +1,9 @@
 import { type GridItemOptions, type GridEngineOptions } from "../core";
 
-export interface GridProps extends GridEngineOptions { }
+export interface GridProps {
+  name: string;
+  options?: GridEngineOptions;
+}
 
 export interface GridItemProps extends GridItemOptions {
   id: string;

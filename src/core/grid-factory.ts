@@ -37,7 +37,6 @@ export class GridFactory implements GridSpec {
   public create(el: HTMLElement, options: GridEngineOptions = {}): GridEngine {
     const grid = new GridEngine(el, options)
     GridFactory.engines.set(grid.id, grid)
-
     return grid
   }
 
@@ -57,6 +56,6 @@ export class GridFactory implements GridSpec {
   }
 
   private configure(options: GridFactoryOptions): GridFactoryOptions {
-    return Object.assign({}, GridFactory.GRID_FACTORY_OPTIONS, options)
+    return { ...GridFactory.GRID_FACTORY_OPTIONS, ...options }
   }
 }

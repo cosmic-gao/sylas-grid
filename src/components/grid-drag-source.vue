@@ -16,6 +16,7 @@ const setupDrag = (name?: string) => {
   if (!name || !el) return
 
   engine.value = GridFactory.getEngine(name)
+  console.log(engine.value)
   if (engine.value) {
     engine.value.getDragManager().setupDragIn(el)
   }
