@@ -6,7 +6,7 @@ import { type GridContext, provideGrid } from "./grid.context"
 </script>
 
 <script setup lang="ts">
-defineProps<GridProps>()
+const props = defineProps<GridProps>()
 
 const gridRef = ref<HTMLElement>()
 
@@ -15,8 +15,8 @@ provideGrid(context)
 
 onMounted(() => {
   if (!gridRef.value) return
-
-  context.engine = createGrid(gridRef.value)
+  console.log(props, "props")
+  context.engine = createGrid(gridRef.value, props)
 })
 </script>
 

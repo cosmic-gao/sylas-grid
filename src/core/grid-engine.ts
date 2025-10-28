@@ -1,4 +1,4 @@
-import { type GridStackOptions, type GridStackWidget, GridStack } from "gridstack"
+import { type GridStackOptions, type GridStackWidget, type DDDragOpt, GridStack } from "gridstack"
 import { createId } from "./create-id"
 import { EventBus } from "./event-bus"
 import { microtask } from "./microtask";
@@ -17,14 +17,47 @@ export interface GridItemOptions extends GridStackWidget {
 
 export interface GridItem extends GridItemOptions { }
 
-export interface GridEngineSpec { }
-
-export interface GridEngineOptions extends GridStackOptions {
-    id?: string;
+export interface GridEngineSpec {
+    readonly id: string;
 }
 
+export interface GridEngineOptions extends GridStackOptions {
+    name?: string;
+    dragInOptions?: DDDragOpt;
+}
+
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    window.navigator.userAgent
+);
+
+const dragDropOption = {
+    alwaysShowResizeHandle: isMobile,
+    resizable: {
+        autoHide: !isMobile,
+        handles: 'se'
+    },
+    acceptWidgets: '.grid-drag-source',
+    dragIn: '.grid-drag-source',  // class that can be dragged from outside
+    dragInOptions: { revert: 'invalid', scroll: true, appendTo: 'body', helper: 'clone' },
+    removable: '.grid-stack-library-trash', // drag-out delete class
+    removeTimeout: 10,
+} as const;
+
+const displayOption = {
+    column: 12,
+    cellHeight: 160,
+    margin: 8,
+    float: true,
+} as const;
+
 export class GridEngine implements GridEngineSpec {
-    private static GRID_ENGINE_OPTIONS: GridEngineOptions = {}
+    private static GRID_ENGINE_OPTIONS: GridEngineOptions = {
+        ...displayOption,
+        ...dragDropOption,
+        disableDrag: false,
+        disableResize: false,
+        animate: true
+    }
 
     public readonly id: string;
     public readonly mitt: EventBus = new EventBus()
@@ -42,7 +75,7 @@ export class GridEngine implements GridEngineSpec {
     public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
         this.el = el
         this.options = this.configure(options);
-        this.id = this.options.id!
+        this.id = this.options.name!
 
         this.gridstack = GridStack.init(this.options, this.el)
 
@@ -103,7 +136,7 @@ export class GridEngine implements GridEngineSpec {
     }
 
     private configure(options: GridEngineOptions): GridEngineOptions {
-        return Object.assign({ id: createId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
+        return Object.assign({ name: createId() }, GridEngine.GRID_ENGINE_OPTIONS, options)
     }
 
     private flush() {

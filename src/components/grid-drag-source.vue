@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import type { GridDragSourceProps } from './grid.props';
 import { GridEngine, GridFactory } from "../core"
 </script>
@@ -10,14 +10,24 @@ const props = defineProps<GridDragSourceProps>()
 const gragSourceRef = ref<HTMLElement>()
 const engine = ref<GridEngine>()
 
-watch(() => props.target, (gridId) => {
-  if (!gridId || !gragSourceRef.value) return
+const setupDrag = (name?: string) => {
+  const el = gragSourceRef.value
 
-  engine.value = GridFactory.get(gridId)
+  if (!name || !el) return
+
+  engine.value = GridFactory.getEngine(name)
   if (engine.value) {
-    engine.value.getDragManager().setupDragIn(gragSourceRef.value)
+    engine.value.getDragManager().setupDragIn(el)
   }
-}, { flush: 'post' })
+}
+
+onMounted(() => {
+  setupDrag(props.target)
+})
+
+watch(
+  () => props.target,
+  (name) => { setupDrag(name) }, { flush: 'post' })
 </script>
 
 <template>

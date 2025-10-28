@@ -1,5 +1,5 @@
 import { type DDGridStack, type GridItemHTMLElement, type GridStackNode, DDElement, GridStack, Utils } from "gridstack"
-import { type GridEngine } from "./grid-engine";
+import { type GridEngine, type GridItem } from "./grid-engine";
 
 export class DragManager {
   public readonly engine: GridEngine;
@@ -14,10 +14,12 @@ export class DragManager {
     this.setup()
   }
 
-  public setupDragIn(element: HTMLElement) {
+  public setupDragIn(element: HTMLElement, helper?: 'clone' | ((el: HTMLElement) => HTMLElement)) {
     const ddElement = DDElement.init(element);
     ddElement.setupDraggable({
-      handle: '.grid-drag-source',
+      ...this.engine.options.dragInOptions,
+      helper: helper ?? this.engine.options.dragInOptions?.helper,
+      handle: this.engine.options.handle,
       start() { },
       stop() { }
     })
