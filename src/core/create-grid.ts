@@ -1,17 +1,11 @@
-import { type GridEngine } from "./grid-engine"
-import { type GridFactoryOptions, GridFactory } from "./grid-factory"
+import { type GridEngineOptions } from "./grid-engine";
+import { GridFactory } from "./grid-factory";
 
-export interface GridOptions extends GridFactoryOptions { }
+export interface GridOptions extends Omit<GridEngineOptions, 'id'> {
+  name: string;
+}
 
-export function createGrid(element: HTMLElement | string,  options: GridOptions = {}): GridEngine {
-  const el = typeof element === 'string'
-    ? document.querySelector(element) as HTMLElement
-    : element
-
-  if (!element) {
-    throw new Error('Container element not found')
-  }
-
-  const factory = GridFactory.getInstance()
-  return factory.create(el, options)
+export function createGrid(els: string | HTMLElement, options?: GridOptions) {
+  const factory = GridFactory.create()
+  return factory.createGrid(els, options)
 }

@@ -57,6 +57,7 @@ export class EventBus<E extends Record<EventType, unknown> = Record<string, unkn
 
     public off<K extends keyof E>(type: K | '*', callback?: EventCallback<E[K]> | WildcardCallback<E>) {
         const callbacks = this.all.get(type)
+
         if (callbacks) {
             if (callback) {
                 const index = callbacks.indexOf(callback as EventCallback<E[keyof E]> | WildcardCallback<E>) >>> 0
@@ -67,18 +68,7 @@ export class EventBus<E extends Record<EventType, unknown> = Record<string, unkn
     }
 
     public emit<K extends keyof E>(type: K, event?: E[K]): void {
-        let callbacks = this.all.get(type);
-        if (callbacks) {
-            (callbacks as EventCallbackList<E[K]>)
-                .slice()
-                .forEach((callback) => callback(event!))
-        }
-
-        callbacks = this.all.get('*');
-        if (callbacks) {
-            (callbacks as WildCardEventCallbackList<E>)
-                .slice()
-                .forEach((callback) => callback(type, event!));
-        }
+        this.all.get(type)?.slice().forEach(callback => (callback as EventCallback<E[K]>)(event!));
+        this.all.get('*')?.slice().forEach(callback => (callback as WildcardCallback<E>)(type, event!));
     }
 }

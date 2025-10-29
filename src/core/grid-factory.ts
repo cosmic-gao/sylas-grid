@@ -1,52 +1,25 @@
-import { type GridEngineOptions, GridEngine } from "./grid-engine"
-
-export interface GridSpec { }
+import { type GridEngineOptions, GridEngine } from "./grid-engine";
 
 export interface GridFactoryOptions { }
 
-export class GridFactory implements GridSpec {
-  private static GRID_FACTORY_OPTIONS: GridFactoryOptions = {}
+export interface GridFactorySpec { }
+
+export class GridFactory implements GridFactorySpec {
+  private static readonly GRID_FACTORY_OPTIONS: GridFactoryOptions = {}
   private static instance: GridFactory | null = null
 
-  private static waiting = new Map<string, Promise<GridEngine>>()
-  private static resolvers: Map<string, (engine: GridEngine) => void> = new Map();
-
-  public static engines = new Map<string, GridEngine>();
-
-  public static getEngine(target: string | HTMLElement): GridEngine | undefined {
-    const id =
-      typeof target === 'string'
-        ? target
-        : target.getAttribute('data-grid-id') ?? undefined;
-
-    return id ? GridFactory.engines.get(id) : undefined;
-  }
-
-  public static async waitForEngine(target: string): Promise<GridEngine> {
-    const engine = GridFactory.getEngine(target);
-    if (engine) return engine;
-
-    if (GridFactory.waiting.has(target)) return GridFactory.waiting.get(target)!;
-
-    const promise = new Promise<GridEngine>((resolve) => GridFactory.resolvers.set(target, (engine) => {
-      resolve(engine)
-
-      GridFactory.resolvers.delete(target)
-      GridFactory.waiting.delete(target)
-    }))
-
-    GridFactory.waiting.set(target, promise)
-    return promise
-  }
-
-  public static getInstance(options?: GridFactoryOptions): GridFactory {
+  public static create(options?: GridFactoryOptions): GridFactory {
     if (!GridFactory.instance) {
       GridFactory.instance = new GridFactory(options)
     }
     return GridFactory.instance
   }
 
+  private waiting: Map<string, Promise<GridEngine>> = new Map()
+  private resolvers: Map<string, (engine: GridEngine) => void> = new Map();
+
   public options: GridFactoryOptions;
+  public grids: Map<string, GridEngine> = new Map();
 
   public constructor(options: GridFactoryOptions = {}) {
     this.options = this.configure(options);
@@ -54,23 +27,49 @@ export class GridFactory implements GridSpec {
     this.initialize()
   }
 
-  public create(el: HTMLElement, options: GridEngineOptions = {}): GridEngine {
-    const grid = new GridEngine(el, options)
-    GridFactory.engines.set(grid.id, grid)
+  public createGrid(els: string | HTMLElement, options: GridEngineOptions = {}): GridEngine {
+    const el = typeof els === 'string'
+      ? document.querySelector(els) as HTMLElement
+      : els
 
-    const resolver = GridFactory.resolvers.get(grid.id)
+    const grid = new GridEngine(el, options)
+    this.grids.set(grid.id, grid)
+
+    const resolver = this.resolvers.get(grid.id)
     if (resolver) resolver(grid)
 
     return grid
   }
 
+  public getGrid(els: string | HTMLElement): GridEngine | undefined {
+    const id = this.resolveId(els)!
+    return this.grids.get(id);
+  }
+
+  public async waitForGrid(els: string | HTMLElement): Promise<GridEngine> {
+    const id = this.resolveId(els)!;
+
+    const grid = this.grids.get(id);
+    if (grid) return grid;
+
+    if (this.waiting.has(id)) return this.waiting.get(id)!;
+
+    const promise = new Promise<GridEngine>((resolve) => this.resolvers.set(id, (engine) => {
+      resolve(engine)
+
+      this.resolvers.delete(id)
+      this.waiting.delete(id)
+    }))
+
+    this.waiting.set(id, promise)
+    return promise
+  }
+
   public destroy() {
-    GridFactory.engines.forEach(engine => {
-      engine.destroy()
-    });
-    GridFactory.engines.clear()
-    GridFactory.waiting.clear()
-    GridFactory.resolvers.clear()
+    this.grids.forEach(grid => grid.destroy());
+    this.grids.clear()
+    this.waiting.clear()
+    this.resolvers.clear()
   }
 
   private initialize() {
@@ -79,6 +78,12 @@ export class GridFactory implements GridSpec {
     window.addEventListener('beforeunload', () => {
       this.destroy()
     })
+  }
+
+  private resolveId(els: string | HTMLElement): string | null {
+    return typeof els === 'string'
+      ? els
+      : els.getAttribute('data-grid-id');
   }
 
   private configure(options: GridFactoryOptions): GridFactoryOptions {
