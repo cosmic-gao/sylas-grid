@@ -1,7 +1,14 @@
-import { type GridStackOptions, type GridStackNode, type GridStackWidget, type DDDragOpt, GridStack } from "gridstack";
+import {
+  type GridStackOptions,
+  type GridStackNode,
+  type GridStackWidget,
+  type DDDragOpt,
+  GridStack,
+} from "gridstack";
 import { createId } from "./create-id"
 import { microtask } from "./microtask";
 import { EventBus } from "./event-bus";
+import { DragEngine } from "./drag-engine"
 
 export interface GridEngineOptions extends GridStackOptions {
   id?: string;
@@ -26,7 +33,7 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
   window.navigator.userAgent
 );
 
-const dragDropOption = {
+const dragDropOptions = {
   alwaysShowResizeHandle: isMobile,
   resizable: {
     autoHide: !isMobile,
@@ -38,7 +45,7 @@ const dragDropOption = {
   removable: '.grid-stack-library-trash', // drag-out delete class
 } as const;
 
-const displayOption = {
+const displayOptions = {
   column: 12,
   cellHeight: 160,
   margin: 8,
@@ -46,9 +53,9 @@ const displayOption = {
 } as const;
 
 export class GridEngine implements GridEngineSpec {
-  private static GRID_ENGINE_OPTIONS: GridEngineOptions = {
-    ...displayOption,
-    ...dragDropOption,
+  private static readonly GRID_ENGINE_OPTIONS: GridEngineOptions = {
+    ...displayOptions,
+    ...dragDropOptions,
     disableDrag: false,
     disableResize: false,
     animate: true
@@ -57,38 +64,50 @@ export class GridEngine implements GridEngineSpec {
   public readonly id: string;
   public readonly el: HTMLElement;
   public options: GridEngineOptions;
+  public draggable: DragEngine;
 
-  private readonly gridstack: GridStack;
+  public readonly gridstack: GridStack;
+  public readonly mitt: EventBus = new EventBus()
+
   private items: Map<string, GridItem> = new Map()
-
-  private readonly mitt: EventBus = new EventBus()
 
   private initialized: boolean = false
   private batching: boolean = false;
 
   public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
     this.el = el
+    this.id = options?.id ?? createId();
     this.options = this.configure(options);
-    this.id = this.options.id!
 
     this.gridstack = GridStack.init(this.options, this.el)
+
+    this.draggable = new DragEngine(this)
 
     this.setup()
   }
 
-  public addItem(el: HTMLElement, options?: GridItemOptions) {
+  public addItem(el: HTMLElement, options?: GridItemOptions): GridItem {
     this.flush()
 
-    this.gridstack.addWidget({ ...options, el } as GridStackWidget)
+    const id = options?.id ?? createId();
+    const finalItemOptions = { id, el, ...options } as GridStackWidget;
+
+    this.gridstack.addWidget(finalItemOptions)
+
+    const item = { ...finalItemOptions, grid: this } as unknown as GridItem
+    this.items.set(id, item)
+
+    return item
   }
 
   private setup() {
     if (this.initialized) return
 
-    this.setupEvents()
-
     this.el.classList.add('sylas-grid')
     this.el.setAttribute('data-grid-id', this.id)
+
+    this.setupEvents()
+
     this.initialized = true
   }
 
@@ -112,6 +131,6 @@ export class GridEngine implements GridEngineSpec {
   }
 
   private configure(options: GridEngineOptions): GridEngineOptions {
-    return { id: createId(), ...GridEngine.GRID_ENGINE_OPTIONS, ...options }
+    return { ...GridEngine.GRID_ENGINE_OPTIONS, ...options, id: this.id }
   }
 }
