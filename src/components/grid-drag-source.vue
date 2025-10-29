@@ -15,7 +15,7 @@ const setupDrag = async (name?: string) => {
 
   const instance = GridFactory.getInstance()
   const grid = await instance.waitForGrid(name)
-  grid.draggable.setupDragIn(el, options, () => {
+  grid.draggable.setupDragIn(el, { h: 6, data:11 } as any, () => {
     const el = gragSourceRef.value?.cloneNode(true)
     return el as HTMLElement
   })

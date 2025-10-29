@@ -3,8 +3,7 @@ import {
   type GridStackNode,
   type GridStackWidget,
   type DDDragOpt,
-  GridStack as _GridStack,
-  type GridHTMLElement,
+  GridStack,
 } from "gridstack";
 import { createId } from "./create-id"
 import { microtask } from "./microtask";
@@ -54,16 +53,6 @@ const displayOptions = {
   float: true,
 } as const;
 
-export class GridStack extends _GridStack {
-  public constructor(el: GridHTMLElement, opts: GridStackOptions = {}) {
-    super(el, opts)
-  }
-
-  public readAttr(el: HTMLElement, clearDefaultAttr = true) {
-    return this._readAttr(el, clearDefaultAttr)
-  }
-}
-
 export class GridEngine implements GridEngineSpec {
   private static readonly GRID_ENGINE_OPTIONS: GridEngineOptions = {
     ...displayOptions,
@@ -91,7 +80,7 @@ export class GridEngine implements GridEngineSpec {
     this.id = options?.id ?? createId();
     this.options = this.configure(options);
 
-    this.gridstack = GridStack.init(this.options, this.el) as GridStack
+    this.gridstack = GridStack.init(this.options, this.el)
 
     this.draggable = new DragEngine(this)
 
@@ -141,6 +130,9 @@ export class GridEngine implements GridEngineSpec {
     this.gridstack.on("added", (_event: Event, nodes: GridStackNode[]) => {
       const items = nodes.map(node => this.items.get(node.id!))
       this.mitt.emit("added", items)
+    })
+    this.gridstack.on("dropped", (event: Event, previousNode: GridStackNode, newNode: GridStackNode) => {
+      console.log(newNode, "newNode")
     })
   }
 

@@ -1,4 +1,4 @@
-import { type DDGridStack, type GridItemHTMLElement, type GridStackNode, GridStack, DDElement, Utils } from "gridstack";
+import { type DDGridStack, type GridStackWidget, type GridItemHTMLElement, type GridStackNode, GridStack, DDElement, Utils } from "gridstack";
 import { type GridEngine, type GridItemOptions } from "./grid-engine";
 
 export interface DragItemOptions extends GridItemOptions {
@@ -12,16 +12,16 @@ export class DragEngine {
   public constructor(grid: GridEngine) {
     this.grid = grid
 
-    this.setup()
+    this.setupAccept()
   }
 
   public destroyDragIn(element: HTMLElement): DDGridStack {
     return GridStack.getDD().draggable(element, 'destroy')
   }
 
-  public setupDragIn<T extends DragItemOptions = DragItemOptions>(
+  public setupDragIn(
     element: HTMLElement,
-    item: T,
+    item: GridStackWidget,
     helper?: 'clone' | ((el: HTMLElement) => HTMLElement)
   ) {
     const ddElement = DDElement.init(element);
@@ -30,14 +30,11 @@ export class DragEngine {
     ddElement.setupDraggable({
       ...this.grid.options.dragInOptions,
       helper: helper ?? this.grid.options.dragInOptions?.helper,
-      handle: this.grid.options.handle,
-      start: () => {
-        this.dragInItem = item;
-      },
+      handle: this.grid.options.handle
     })
   }
 
-  private setup() {
+  private setupAccept() {
     if (!this.getDD().isDroppable(this.grid.gridstack.el)) {
       const that: GridStack = this.grid.gridstack;
       this.getDD().droppable(this.grid.el, {
@@ -80,26 +77,37 @@ export class DragEngine {
         return false;
       })
       .off(this.grid.gridstack.el, 'drop')
-      .on(this.grid.gridstack.el, 'drop', (_event, el: GridItemHTMLElement, helper?: GridItemHTMLElement) => {
-        const that: GridStack = this.grid.gridstack;
+      .on(this.grid.gridstack.el, 'drop', (event, el: GridItemHTMLElement, helper?: GridItemHTMLElement) => {
+        const that: any = this.grid.gridstack;
 
-        const node: GridStackNode = el.gridstackNode!;
-        if (node && node.grid === that && !node._isExternal) {
-          return false;
-        }
-
-        const wasAdded = !!that.placeholder.parentElement;
+        const node = (helper?.gridstackNode || el.gridstackNode) as GridStackNode;
+        // ignore drop on ourself from ourself that didn't come from the outside - dragend will handle the simple move instead
+        if (node?.grid === that && !node._isExternal) return false;
+        const wasAdded = !!that.placeholder.parentElement; // skip items not actually added to us because of constrains, but do cleanup #1419
+        const wasSidebar = el !== helper;
         that.placeholder.remove();
+        delete that.placeholder.gridstackNode;
 
         const origNode = el._gridstackNodeOrig;
-        // delete el._gridstackNodeOrig;
+        delete el._gridstackNodeOrig;
+        if (wasAdded && origNode?.grid && origNode.grid !== that) {
+          const oGrid = origNode.grid;
+          oGrid.engine.removeNodeFromLayoutCache(origNode);
+          oGrid.engine.removedNodes.push(origNode);
+          (oGrid._triggerRemoveEvent() as any)._triggerChangeEvent();
+          // if it's an empty sub-grid that got auto-created, nuke it
+          if (oGrid.parentGridNode && !oGrid.engine.nodes.length && oGrid.opts.subGridDynamic) {
+            oGrid.removeAsSubGrid();
+          }
+        }
 
         if (!node) {
           return false;
         }
 
+        // use existing placeholder node as it's already in our list with drop location
         if (wasAdded) {
-          that.engine.cleanupNode(node);
+          that.engine.cleanupNode(node); // removes all internal _xyz values
           node.grid = that;
         }
 
@@ -113,11 +121,15 @@ export class DragEngine {
         this.getDD().off(el, 'drag');
         that.engine.removeNode(node);
 
-        (that as any)._updateContainerHeight();
+        if (!wasAdded) return false;
+        const subGrid = node.subGrid?.el?.gridstack; // set when actual sub-grid present
+        Utils.copyPos(node, that._readAttr(that.placeholder)); // placeholder values as moving VERY fast can throw things off #1578
+        Utils.removePositioningStyles(el);
 
-        console.log(node, origNode, el , that.placeholder)
-
-        this.grid.emit('added', this.dragInItem)
+        that.engine.endUpdate();
+        if (that._gsEventHandler['dropped']) {
+          that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode && origNode.grid ? origNode : undefined, node);
+        }
       })
   }
 

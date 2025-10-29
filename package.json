@@ -25,7 +25,7 @@
   "pnpm": {
     "overrides": {
       "vite": "npm:rolldown-vite@7.1.14",
-      "gridstack": "link:G:/gridstack.js"
+      "gridstack": "link:F:/gridstack.js"
     },
     "ignoredBuiltDependencies": [
       "@parcel/watcher"

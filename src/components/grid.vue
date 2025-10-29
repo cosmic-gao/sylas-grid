@@ -34,7 +34,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-@use 'G:/gridstack.js/src/gridstack.scss';
+@use 'F:/gridstack.js/src/gridstack.scss';
 
 .sylas-grid-vue {
   background-color: #f5f5f5;
