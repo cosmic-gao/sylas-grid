@@ -66,10 +66,19 @@ export class DragManager {
           return false;
         }
 
+        const wasAdded = !!that.placeholder.parentElement;
+        that.placeholder.remove();
+
         const origNode = el._gridstackNodeOrig;
+        delete el._gridstackNodeOrig;
 
         if (!node) {
           return false;
+        }
+
+        if (wasAdded) {
+          that.engine.cleanupNode(node);
+          node.grid = that;
         }
 
         if (helper !== el) {
@@ -80,6 +89,7 @@ export class DragManager {
         }
 
         this.getDD().off(el, 'drag');
+
         that.engine.removeNode(node);
       })
   }

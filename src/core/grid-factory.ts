@@ -8,6 +8,9 @@ export class GridFactory implements GridSpec {
   private static GRID_FACTORY_OPTIONS: GridFactoryOptions = {}
   private static instance: GridFactory | null = null
 
+  private static waiting = new Map<string, Promise<GridEngine>>()
+  private static resolvers: Map<string, (engine: GridEngine) => void> = new Map();
+
   public static engines = new Map<string, GridEngine>();
 
   public static getEngine(target: string | HTMLElement): GridEngine | undefined {
@@ -17,6 +20,23 @@ export class GridFactory implements GridSpec {
         : target.getAttribute('data-grid-id') ?? undefined;
 
     return id ? GridFactory.engines.get(id) : undefined;
+  }
+
+  public static async waitForEngine(target: string): Promise<GridEngine> {
+    const engine = GridFactory.getEngine(target);
+    if (engine) return engine;
+
+    if (GridFactory.waiting.has(target)) return GridFactory.waiting.get(target)!;
+
+    const promise = new Promise<GridEngine>((resolve) => GridFactory.resolvers.set(target, (engine) => {
+      resolve(engine)
+
+      GridFactory.resolvers.delete(target)
+      GridFactory.waiting.delete(target)
+    }))
+
+    GridFactory.waiting.set(target, promise)
+    return promise
   }
 
   public static getInstance(options?: GridFactoryOptions): GridFactory {
@@ -37,6 +57,10 @@ export class GridFactory implements GridSpec {
   public create(el: HTMLElement, options: GridEngineOptions = {}): GridEngine {
     const grid = new GridEngine(el, options)
     GridFactory.engines.set(grid.id, grid)
+
+    const resolver = GridFactory.resolvers.get(grid.id)
+    if (resolver) resolver(grid)
+
     return grid
   }
 
@@ -45,6 +69,8 @@ export class GridFactory implements GridSpec {
       engine.destroy()
     });
     GridFactory.engines.clear()
+    GridFactory.waiting.clear()
+    GridFactory.resolvers.clear()
   }
 
   private initialize() {

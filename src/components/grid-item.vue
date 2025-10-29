@@ -1,7 +1,7 @@
 <script lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { type GridItem } from "../core"
-import { type GridItemProps } from './grid.props';
+import { type GridItemProps } from './grid.type';
 import { GRID_ITEM_ATTRS } from "./grid.const"
 import { useGrid } from "./grid.context"
 </script>

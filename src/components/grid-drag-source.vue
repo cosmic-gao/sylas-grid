@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import type { GridDragSourceProps } from './grid.props';
+import type { GridDragSourceProps } from './grid.type';
 import { GridEngine, GridFactory } from "../core"
 </script>
 
@@ -10,13 +10,11 @@ const props = defineProps<GridDragSourceProps>()
 const gragSourceRef = ref<HTMLElement>()
 const engine = ref<GridEngine>()
 
-const setupDrag = (name?: string) => {
+const setupDrag = async (name?: string) => {
   const el = gragSourceRef.value
-
   if (!name || !el) return
 
-  engine.value = GridFactory.getEngine(name)
-  console.log(engine.value)
+  engine.value = await GridFactory.waitForEngine(name)
   if (engine.value) {
     engine.value.getDragManager().setupDragIn(el)
   }

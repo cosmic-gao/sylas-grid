@@ -1,6 +1,6 @@
 import { type GridStackOptions, type GridStackWidget, type DDDragOpt, GridStack } from "gridstack"
 import { createId } from "./create-id"
-import { EventBus } from "./event-bus"
+import { type EventCallback, EventBus } from "./event-bus"
 import { microtask } from "./microtask";
 import { DragManager } from "./drag-manager";
 
@@ -119,6 +119,10 @@ export class GridEngine implements GridEngineSpec {
 
     public getDragManager(): DragManager {
         return this.dragManager
+    }
+
+    public on(event: string, callback: EventCallback): () => void {
+        return this.mitt.on(event, callback)
     }
 
     public destroy() {

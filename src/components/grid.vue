@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMounted, ref, shallowReactive } from "vue";
-import { createGrid } from "../core"
-import { type GridProps } from "./grid.props"
+import { type GridItemOptions, createGrid } from "../core"
+import { type GridEmits, type GridProps } from "./grid.type"
 import { type GridContext, provideGrid } from "./grid.context"
 </script>
 
@@ -9,6 +9,7 @@ import { type GridContext, provideGrid } from "./grid.context"
 const props = withDefaults(defineProps<GridProps>(), {
   options: () => ({})
 })
+const emit = defineEmits<GridEmits>()
 
 const gridRef = ref<HTMLElement>()
 
@@ -18,6 +19,10 @@ provideGrid(context)
 onMounted(() => {
   if (!gridRef.value) return
   context.engine = createGrid(gridRef.value, { ...props.options, id: props.name })
+
+  context.engine.on("added", (item: any) => {
+    emit('added', item)
+  })
 })
 </script>
 
@@ -28,7 +33,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-@use 'F:/gridstack.js/src/gridstack.scss';
+@use 'G:/gridstack.js/src/gridstack.scss';
 
 .sylas-grid-vue {
   background-color: #f5f5f5;
