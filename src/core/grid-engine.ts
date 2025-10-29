@@ -3,12 +3,14 @@ import {
   type GridStackNode,
   type GridStackWidget,
   type DDDragOpt,
-  GridStack,
+  GridStack as _GridStack,
+  type GridHTMLElement,
 } from "gridstack";
 import { createId } from "./create-id"
 import { microtask } from "./microtask";
 import { EventBus } from "./event-bus";
 import { DragEngine } from "./drag-engine"
+
 
 export interface GridEngineOptions extends GridStackOptions {
   id?: string;
@@ -17,7 +19,7 @@ export interface GridEngineOptions extends GridStackOptions {
 }
 
 export interface GridItemOptions extends GridStackWidget {
-  id: string;
+
 }
 
 export interface GridItem extends GridItemOptions {
@@ -52,6 +54,16 @@ const displayOptions = {
   float: true,
 } as const;
 
+export class GridStack extends _GridStack {
+  public constructor(el: GridHTMLElement, opts: GridStackOptions = {}) {
+    super(el, opts)
+  }
+
+  public readAttr(el: HTMLElement, clearDefaultAttr = true) {
+    return this._readAttr(el, clearDefaultAttr)
+  }
+}
+
 export class GridEngine implements GridEngineSpec {
   private static readonly GRID_ENGINE_OPTIONS: GridEngineOptions = {
     ...displayOptions,
@@ -78,10 +90,8 @@ export class GridEngine implements GridEngineSpec {
     this.el = el
     this.id = options?.id ?? createId();
     this.options = this.configure(options);
-        console.log(this.options, options)
 
-
-    this.gridstack = GridStack.init(this.options, this.el)
+    this.gridstack = GridStack.init(this.options, this.el) as GridStack
 
     this.draggable = new DragEngine(this)
 
@@ -100,6 +110,15 @@ export class GridEngine implements GridEngineSpec {
     this.items.set(id, item)
 
     return item
+  }
+
+  public on(type: string, callback: (...args: any[]) => void): () => void {
+    return this.mitt.on(type, callback)
+  }
+
+
+  public emit(type: string, ...args: any[]): void {
+    this.mitt.emit(type, ...args)
   }
 
   public destroy() {

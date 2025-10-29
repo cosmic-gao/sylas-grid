@@ -6,7 +6,7 @@ import { type GridContext, provideGrid } from "./grid.context"
 </script>
 
 <script setup lang="ts">
-const props = defineProps<GridProps>()
+const { name, options = {} } = defineProps<GridProps>()
 const emit = defineEmits<GridEmits>()
 
 const gridRef = ref<HTMLElement>()
@@ -16,7 +16,14 @@ provideGrid(context)
 
 onMounted(() => {
   if (!gridRef.value) return
-  context.engine = createGrid(gridRef.value, props)
+
+  options.id = name
+  context.engine = createGrid(gridRef.value, options)
+
+  context.engine.on('added', items => {
+    emit('added', items)
+    // console.log(items)
+  })
 })
 </script>
 

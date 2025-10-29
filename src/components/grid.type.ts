@@ -2,15 +2,14 @@ import { type GridItemOptions, type GridOptions } from "../core";
 
 export interface GridProps extends GridOptions {
   name: string;
+  options?: GridOptions;
 }
 
 export interface GridItemProps extends GridItemOptions {
-  id: string;
 }
 
-export interface GridDragSourceProps {
+export interface GridDragSourceProps extends GridItemProps {
   target: string;
-  disabled?: boolean;
 }
 
 export interface GridEmits {

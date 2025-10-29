@@ -1,36 +1,37 @@
 <script lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import type { GridDragSourceProps } from './grid.type';
-import { GridEngine, GridFactory } from "../core"
+import { GridFactory } from "../core"
 </script>
 
 <script setup lang="ts">
-const props = defineProps<GridDragSourceProps>()
+const { target, ...options } = defineProps<GridDragSourceProps>()
 
 const gragSourceRef = ref<HTMLElement>()
-const engine = ref<GridEngine>()
 
 const setupDrag = async (name?: string) => {
   const el = gragSourceRef.value
   if (!name || !el) return
 
-  engine.value = await GridFactory.waitForEngine(name)
-  if (engine.value) {
-    engine.value.getDragManager().setupDragIn(el)
-  }
+  const instance = GridFactory.getInstance()
+  const grid = await instance.waitForGrid(name)
+  grid.draggable.setupDragIn(el, options, () => {
+    const el = gragSourceRef.value?.cloneNode(true)
+    return el as HTMLElement
+  })
 }
 
 onMounted(() => {
-  setupDrag(props.target)
+  setupDrag(target)
 })
 
 watch(
-  () => props.target,
+  () => target,
   (name) => { setupDrag(name) }, { flush: 'post' })
 </script>
 
 <template>
-  <div ref="gragSourceRef" class="grid-drag-source">
+  <div ref="gragSourceRef" class="grid-drag-source grid-stack-item-content">
     <slot></slot>
   </div>
 </template>

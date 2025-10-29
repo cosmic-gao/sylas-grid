@@ -8,7 +8,7 @@ export class GridFactory implements GridFactorySpec {
   private static readonly GRID_FACTORY_OPTIONS: GridFactoryOptions = {}
   private static instance: GridFactory | null = null
 
-  public static create(options?: GridFactoryOptions): GridFactory {
+  public static getInstance(options?: GridFactoryOptions): GridFactory {
     if (!GridFactory.instance) {
       GridFactory.instance = new GridFactory(options)
     }

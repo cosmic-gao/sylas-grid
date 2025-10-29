@@ -12,9 +12,7 @@ const props = defineProps<GridItemProps>();
 const itemRef = ref<HTMLElement>()
 const gridItem = ref<GridItem>()
 
-const context = useGrid()
-
-const engine = computed(() => context.engine!)
+const { engine } = useGrid()
 
 const gridAttrs = computed(() =>
   Object.fromEntries(
@@ -26,18 +24,8 @@ const gridAttrs = computed(() =>
 const properties = computed(() => ({ ...gridAttrs.value }))
 
 onMounted(() => {
-  if (!itemRef.value || !engine?.value) return
-  gridItem.value = engine.value.addItem(itemRef.value, props)
-})
-
-watch(props, () => {
-  if (!gridItem.value || !engine.value) return
-  engine.value.updateItem(gridItem.value.id!, props)
-})
-
-onUnmounted(() => {
-  if (!gridItem.value || !engine.value) return
-  engine.value.removeItem(gridItem.value.id!)
+  if (!itemRef.value || !engine) return
+  gridItem.value = engine.addItem(itemRef.value, props)
 })
 </script>
 
