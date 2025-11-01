@@ -1,5 +1,5 @@
-import { type DDGridStack, type GridStackWidget, type GridItemHTMLElement, type GridStackNode, GridStack, DDElement, Utils } from "gridstack";
-import { type GridEngine, type GridItemOptions } from "./grid-engine";
+import { type GridStackDroppedHandler, type DDGridStack, type GridStackWidget, type GridItemHTMLElement, type GridStackNode, DDElement, Utils } from "gridstack";
+import { type GridEngine, type GridItemOptions, GridStack } from "./grid-engine";
 
 export interface DragItemOptions extends GridItemOptions {
 
@@ -78,7 +78,7 @@ export class DragEngine {
       })
       .off(this.grid.gridstack.el, 'drop')
       .on(this.grid.gridstack.el, 'drop', (event, el: GridItemHTMLElement, helper?: GridItemHTMLElement) => {
-        const that: any = this.grid.gridstack;
+        const that: GridStack = this.grid.gridstack;
 
         const node = (helper?.gridstackNode || el.gridstackNode) as GridStackNode;
         // ignore drop on ourself from ourself that didn't come from the outside - dragend will handle the simple move instead
@@ -88,13 +88,13 @@ export class DragEngine {
         that.placeholder.remove();
         delete that.placeholder.gridstackNode;
 
-        const origNode = el._gridstackNodeOrig;
+        const origNode = el._gridstackNodeOrig!;
         delete el._gridstackNodeOrig;
         if (wasAdded && origNode?.grid && origNode.grid !== that) {
-          const oGrid = origNode.grid;
+          const oGrid = origNode.grid as GridStack;
           oGrid.engine.removeNodeFromLayoutCache(origNode);
           oGrid.engine.removedNodes.push(origNode);
-          (oGrid._triggerRemoveEvent() as any)._triggerChangeEvent();
+          oGrid.triggerRemoveEvent().triggerChangeEvent();
           // if it's an empty sub-grid that got auto-created, nuke it
           if (oGrid.parentGridNode && !oGrid.engine.nodes.length && oGrid.opts.subGridDynamic) {
             oGrid.removeAsSubGrid();
@@ -121,20 +121,15 @@ export class DragEngine {
         this.getDD().off(el, 'drag');
         that.engine.removeNode(node);
 
-          that._removeDD(el);
+        that.removeDD(el);
         if (!wasAdded) return false;
         const subGrid = node.subGrid?.el?.gridstack; // set when actual sub-grid present
-        Utils.copyPos(node, that._readAttr(that.placeholder)); // placeholder values as moving VERY fast can throw things off #1578
+        Utils.copyPos(node, that.readAttr(that.placeholder)); // placeholder values as moving VERY fast can throw things off #1578
         Utils.removePositioningStyles(el);
 
-        // that.engine.endUpdate();
-        // if (that._gsEventHandler['dropped']) {
-        //   that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode && origNode.grid ? origNode : undefined, node);
-        // }
-           that._triggerAddEvent();
-        that._triggerChangeEvent();
-        that.engine.endUpdate();
-        this.grid.mitt.emit("added", [{ id: "1", x: 3, y: 0, w: 3, h: 2 }])
+        if (that._gsEventHandler['dropped']) {
+          that._gsEventHandler['dropped']?.({ ...event, type: 'dropped' }, origNode, node);
+        }
       })
   }
 
