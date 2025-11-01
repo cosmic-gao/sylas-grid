@@ -15,7 +15,7 @@ export interface GridDragSourceProps extends GridItemProps {
 export interface GridEmits {
   (e: 'update:modelValue', items: GridItemOptions[]): void
   (e: 'change', items: GridItemOptions[]): void
-  (e: 'added', item: GridItemOptions): void
+  (e: 'added', items: GridItemOptions[]): void
   (e: 'removed', item: GridItemOptions): void
   (e: 'dragstart', item: GridItemOptions): void
   (e: 'dragstop', item: GridItemOptions): void

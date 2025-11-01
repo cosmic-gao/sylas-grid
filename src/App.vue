@@ -16,8 +16,10 @@ const onAddWidget = () => {
   items.value.push({ id: "1", x: 3, y: 0, w: 3, h: 2 })
 }
 
-const added = (item: any) => {
-  // items.value.push(item)
+const added = (data: any) => {
+  // items.value.push(...items)
+  items.value.push({ id: "1", x: 3, y: 0, w: 3, h: 2 })
+  console.log(data)
 }
 </script>
 

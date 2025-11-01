@@ -70,7 +70,7 @@ export class DragEngine {
       .on(this.grid.gridstack.el, 'dropout', (_event, el: GridItemHTMLElement, helper?: GridItemHTMLElement) => {
         const that: any = this.grid.gridstack;
         const node = el.gridstackNode!;
-        if (!node.grid || node.grid === that) {
+        if (!node?.grid || node?.grid === that) {
           that._leave(el, helper);
         }
         this.getDD().off(el, 'drag');
@@ -82,7 +82,7 @@ export class DragEngine {
 
         const node = (helper?.gridstackNode || el.gridstackNode) as GridStackNode;
         // ignore drop on ourself from ourself that didn't come from the outside - dragend will handle the simple move instead
-        if (node?.grid === that && !node._isExternal) return false;
+        if (node?.grid === that && !node?._isExternal) return false;
         const wasAdded = !!that.placeholder.parentElement; // skip items not actually added to us because of constrains, but do cleanup #1419
         const wasSidebar = el !== helper;
         that.placeholder.remove();
@@ -121,15 +121,20 @@ export class DragEngine {
         this.getDD().off(el, 'drag');
         that.engine.removeNode(node);
 
+          that._removeDD(el);
         if (!wasAdded) return false;
         const subGrid = node.subGrid?.el?.gridstack; // set when actual sub-grid present
         Utils.copyPos(node, that._readAttr(that.placeholder)); // placeholder values as moving VERY fast can throw things off #1578
         Utils.removePositioningStyles(el);
 
+        // that.engine.endUpdate();
+        // if (that._gsEventHandler['dropped']) {
+        //   that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode && origNode.grid ? origNode : undefined, node);
+        // }
+           that._triggerAddEvent();
+        that._triggerChangeEvent();
         that.engine.endUpdate();
-        if (that._gsEventHandler['dropped']) {
-          that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode && origNode.grid ? origNode : undefined, node);
-        }
+        this.grid.mitt.emit("added", [{ id: "1", x: 3, y: 0, w: 3, h: 2 }])
       })
   }
 

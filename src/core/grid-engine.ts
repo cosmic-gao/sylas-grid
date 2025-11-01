@@ -88,9 +88,11 @@ export class GridEngine implements GridEngineSpec {
   }
 
   public addItem(el: HTMLElement, options?: GridItemOptions): GridItem {
+    const id = options?.id ?? createId();
+    if(this.items.has(id)) return this.items.get(id)!;
+
     this.flush()
 
-    const id = options?.id ?? createId();
     const finalItemOptions = { id, el, ...options } as GridStackWidget;
 
     this.gridstack.addWidget(finalItemOptions)
@@ -107,6 +109,7 @@ export class GridEngine implements GridEngineSpec {
 
 
   public emit(type: string, ...args: any[]): void {
+    console.log(type , args)
     this.mitt.emit(type, ...args)
   }
 
@@ -129,10 +132,10 @@ export class GridEngine implements GridEngineSpec {
   private setupEvents() {
     this.gridstack.on("added", (_event: Event, nodes: GridStackNode[]) => {
       const items = nodes.map(node => this.items.get(node.id!))
-      this.mitt.emit("added", items)
+      // this.mitt.emit("added", items)
     })
-    this.gridstack.on("dropped", (event: Event, previousNode: GridStackNode, newNode: GridStackNode) => {
-      console.log(newNode, "newNode")
+    this.gridstack.on("dropped", (_event: Event, _previousNode: GridStackNode, item: GridStackNode) => {
+      // this.mitt.emit("added", [item])
     })
   }
 
