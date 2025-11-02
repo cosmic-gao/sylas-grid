@@ -1,9 +1,9 @@
 <script lang="ts">
 import { computed, watch, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
 import { type GridItemProps } from './grid.prop';
-import { GRID_ITEM_ATTRS } from "./grid.const"
+import { GRID_ITEM_KEYS } from "./grid.const"
 import { useGrid } from "./grid.context"
-import { type GridItem, type GridItemOptions } from "../core"
+import { type GridItem, type GridItemOptions, GRID_ITEM_ATTRS, GridEngine } from "../core"
 </script>
 
 <script setup lang="ts">
@@ -15,11 +15,6 @@ const gridItem = ref<GridItem>()
 
 const grid = useGrid()
 
-const pick = <T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
-  const res = {} as Pick<T, K>
-  keys.forEach(k => res[k] = obj[k])
-  return res
-}
 
 const gridAttrs = computed(() =>
   Object.fromEntries(
@@ -31,7 +26,7 @@ const gridAttrs = computed(() =>
 const properties = computed(() => ({ ...gridAttrs.value }))
 
 watch(
-  () => pick(props, ['x', 'y', 'w', 'h']),
+  () => GridEngine.pick(props, GRID_ITEM_KEYS),
   (options) => {
     if (!el.value || !grid.value) return
     grid.value.gridstack.update(el.value, options);

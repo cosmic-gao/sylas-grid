@@ -2,10 +2,11 @@ import {
   type DDGridStack,
   type GridItemHTMLElement,
   type GridStackNode,
+  type GridStackWidget,
   DDElement,
   Utils
 } from "gridstack";
-import { type GridEngine, type DragItemOptions } from "./grid-engine";
+import { type DragItemOptions, GridEngine, GRID_ITEM_ATTRS } from "./grid-engine";
 import { GridStack } from "./grid-stack"
 
 export class DragEngine {
@@ -136,17 +137,17 @@ export class DragEngine {
         if (!wasAdded) return false;
         Utils.copyPos(node, that._readAttr(that.placeholder)); // placeholder values as moving VERY fast can throw things off #1578
         Utils.removePositioningStyles(el);
+        that.engine.removeNode(node);
 
         that._updateContainerHeight();
+        that._triggerChangeEvent();
+
         that.engine.endUpdate();
 
-
         if (that._gsEventHandler['dropped']) {
-          delete node.el
-          delete node.grid
-          delete node._id
-          that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode, node);
+          that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode, GridEngine.pick(node, Object.keys(GRID_ITEM_ATTRS) as unknown as (keyof GridStackWidget)[]));
         }
+        return false; // prevent parent from receiving msg (which may be grid as well)
       })
   }
 

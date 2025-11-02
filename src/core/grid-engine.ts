@@ -57,6 +57,24 @@ export interface EventEmitt {
   dropped: { event: Event; node: DragItemOptions<any> };
 }
 
+export const GRID_ITEM_ATTRS = {
+  x: 'x',
+  y: 'y',
+  w: 'w',
+  h: 'h',
+  maxW: 'max-w',
+  maxH: 'max-h',
+  minW: 'min-w',
+  minH: 'min-h',
+  noResize: 'no-resize',
+  noMove: 'no-move',
+  locked: 'locked',
+  static: 'static',
+  id: 'id',
+  sizeToContent: 'size-to-content',
+  autoPosition: 'auto-position'
+} as const
+
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
   window.navigator.userAgent
 );
@@ -87,6 +105,16 @@ export class GridEngine implements GridEngineSpec {
     disableDrag: false,
     disableResize: false,
     animate: true
+  }
+
+  public static pick<T extends object, K extends keyof T>(
+    obj: T,
+    keys: readonly K[]
+  ): Pick<T, K> {
+    return keys.reduce((res, key) => {
+      if (Object.hasOwn(obj, key)) res[key] = obj[key]
+      return res
+    }, {} as Pick<T, K>)
   }
 
   public readonly id: string;

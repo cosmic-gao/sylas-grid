@@ -26,7 +26,6 @@ onMounted(() => {
   grid.value = createGrid(el.value, options)
 
   grid.value.on('dropped', ({ node }) => {
-    console.log(node)
     items.value = [...items.value, node]
     emit('dropped', node)
   })

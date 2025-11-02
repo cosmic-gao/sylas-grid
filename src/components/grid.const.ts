@@ -1,19 +1,5 @@
 import { type GridItemProps } from './grid.prop';
+import { GRID_ITEM_ATTRS } from "../core"
 
-export const GRID_ITEM_ATTRS = {
-  x: 'x',
-  y: 'y',
-  w: 'w',
-  h: 'h',
-  maxW: 'max-w',
-  maxH: 'max-h',
-  minW: 'min-w',
-  minH: 'min-h',
-  noResize: 'no-resize',
-  noMove: 'no-move',
-  locked: 'locked',
-  static: 'static',
-  id: 'id',
-  sizeToContent: 'size-to-content',
-  autoPosition: 'auto-position'
-} as const
+export const GRID_ITEM_KEYS: (keyof GridItemProps)[] = Object.keys(GRID_ITEM_ATTRS)
+  .filter(key => key !== 'noResize' && key !== 'noMove') as (keyof GridItemProps)[];

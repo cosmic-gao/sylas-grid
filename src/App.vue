@@ -9,17 +9,11 @@ import GridItem from "./components/grid-item.vue"
 import GridDragPortal from "./components/grid-drag-portal.vue"
 
 const items = ref<GridItemProps[]>([
-  { id: "0", x: 0, y: 0, w: 2, h: 2, minW: 1, autoPosition: true }
+  { id: "0", x: 0, y: 0, w: 2, h: 2, minW: 1 }
 ])
 
 const onAddWidget = () => {
   items.value.push({ id: "1", x: 3, y: 0, w: 3, h: 2 })
-}
-
-const added = (data: any) => {
-  // items.value.push(...items)
-  items.value.push({ id: "1", x: 3, y: 0, w: 3, h: 2 })
-  console.log(data)
 }
 </script>
 

@@ -17,7 +17,6 @@ const setupDrag = async (name?: string) => {
 
     const instance = GridFactory.getInstance()
     grid.value = await instance.waitForGrid(name)
-    console.log(options)
     if (grid.value) grid.value.draggable.setupDragIn(dom, options)
 }
 
@@ -34,7 +33,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div ref="grid-drag-portal" class="grid-drag-portal grid-stack-item-content" tabindex="0">
+    <div ref="grid-drag-portal" class="sylas-grid-drag-portal grid-drag-portal grid-stack-item-content" tabindex="0">
         <slot></slot>
     </div>
 </template>
+
+<style lang="scss">
+.sylas-grid-drag-portal {
+    display: inline-block;
+}
+</style>
