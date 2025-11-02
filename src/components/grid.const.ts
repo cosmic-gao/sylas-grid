@@ -1,3 +1,5 @@
+import { type GridItemProps } from './grid.prop';
+
 export const GRID_ITEM_ATTRS = {
   x: 'x',
   y: 'y',

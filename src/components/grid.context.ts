@@ -1,8 +1,5 @@
-import { GridEngine } from "../core"
+import type { ShallowRef } from "vue"
 import { useContext } from '../composables/use-context'
+import { GridEngine } from "../core"
 
-export interface GridContext {
-  engine: GridEngine | null;
-}
-
-export const [provideGrid, useGrid] = useContext('GridContext', (context: GridContext) => context)
+export const [provideGrid, useGrid] = useContext<[ShallowRef<GridEngine>], ShallowRef<GridEngine>>('GridContext')

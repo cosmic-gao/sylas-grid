@@ -1,12 +1,12 @@
 <script lang="ts">
 import { ref } from "vue";
-import { type GridItemProps } from "./components/grid.type"
+import { type GridItemProps } from "./components/grid.prop"
 </script>
 
 <script setup lang="ts">
 import Grid from "./components/grid.vue"
 import GridItem from "./components/grid-item.vue"
-import GridGragSource from "./components/grid-drag-source.vue"
+import GridDragPortal from "./components/grid-drag-portal.vue"
 
 const items = ref<GridItemProps[]>([
   { id: "0", x: 0, y: 0, w: 2, h: 2, minW: 1, autoPosition: true }
@@ -26,16 +26,16 @@ const added = (data: any) => {
 <template>
   <button @click="onAddWidget">Add a widget</button>
   <button>Delete the last widget</button>
-  <GridGragSource target="dashboard">
+  <GridDragPortal target="dashboard">
     <div style="border: 1px solid #0a59f7;width:70px;height: 70px;background-color: #e6eeff;">
       Add External widget1
     </div>
-  </GridGragSource>
-  <GridGragSource target="dashboard">
+  </GridDragPortal>
+  <GridDragPortal target="dashboard">
     <div style="border: 1px solid #0a59f7;width:70px;height: 70px;background-color: #e6eeff;">
       Add External widget2
     </div>
-  </GridGragSource>
+  </GridDragPortal>
 
   <Grid name="dashboard" v-model="items">
     <GridItem v-for="item in items" :key="item.id" v-bind="item">{{ item.id }}</GridItem>

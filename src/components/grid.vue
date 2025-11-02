@@ -1,31 +1,32 @@
 <script lang="ts">
-import { onMounted, ref, shallowReactive, computed } from "vue";
-import { createGrid } from "../core"
-import { type GridEmits, type GridProps, type GridItemProps } from "./grid.type"
-import { type GridContext, provideGrid } from "./grid.context"
+import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef } from "vue";
+import { type GridEmits, type GridProps, type GridItemProps } from "./grid.prop"
+import { provideGrid } from "./grid.context"
+import { type GridEngine, createGrid } from "../core"
 </script>
 
 <script setup lang="ts">
 const { name, modelValue, options = {} } = defineProps<GridProps>()
 const emit = defineEmits<GridEmits>()
 
-const gridRef = ref<HTMLElement>()
+const el = useTemplateRef<HTMLElement>('sylas-grid')
 
 const items = computed<GridItemProps[]>({
   get: () => modelValue ?? [],
   set: (value) => emit('update:modelValue', value),
 })
 
-const context = shallowReactive<GridContext>({ engine: null })
-provideGrid(context)
+const grid = shallowRef() as ShallowRef<GridEngine>
+provideGrid(grid)
 
 onMounted(() => {
-  if (!gridRef.value) return
+  if (!el.value) return
 
   options.id = name
-  context.engine = createGrid(gridRef.value, options)
+  grid.value = createGrid(el.value, options)
 
-  context.engine.on('dropped', ({ node }) => {
+  grid.value.on('dropped', ({ node }) => {
+    console.log(node)
     items.value = [...items.value, node]
     emit('dropped', node)
   })
@@ -33,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="gridRef" class="grid-stack sylas-grid-vue">
+  <div ref="sylas-grid" class="grid-stack sylas-grid-vue">
     <slot></slot>
   </div>
 </template>

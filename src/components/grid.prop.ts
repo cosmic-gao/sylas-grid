@@ -3,7 +3,7 @@ import { type GridItemOptions, type GridOptions, type DragItemOptions } from "..
 export interface GridItemProps extends GridItemOptions {
 }
 
-export interface GridDragSourceProps extends Omit<GridItemProps, 'x' | 'y'> {
+export interface GridDragPortalProps extends Omit<GridItemProps, 'x' | 'y'> {
   target: string;
 }
 

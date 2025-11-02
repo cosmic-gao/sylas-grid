@@ -1,8 +1,10 @@
 import { type InjectionKey, inject, provide } from 'vue';
 
+const identity = <T extends unknown[], R>(...args: T): R => args[0] as unknown as R;
+
 export function useContext<T extends unknown[], R>(
   namespace: string,
-  composable: (...args: T) => R
+  composable: (...args: T) => R = identity
 ) {
   const key: InjectionKey<R> = Symbol(namespace) as InjectionKey<R>
 

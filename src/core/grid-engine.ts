@@ -67,8 +67,8 @@ const dragDropOptions = {
     autoHide: !isMobile,
     handles: 'se'
   },
-  acceptWidgets: '.grid-drag-source',
-  dragIn: '.grid-drag-source',  // class that can be dragged from outside
+  acceptWidgets: '.grid-drag-portal',
+  dragIn: '.grid-drag-portal',  // class that can be dragged from outside
   dragInOptions: { revert: 'invalid', scroll: true, appendTo: 'body', helper: 'clone' },
   removable: '.grid-stack-library-trash', // drag-out delete class
 } as const;
@@ -129,6 +129,8 @@ export class GridEngine implements GridEngineSpec {
 
     return item
   }
+
+  public removeItem(els: string | HTMLElement) { }
 
   public on<K extends keyof EventEmitt>(type: K, callback: EventCallback<EventEmitt[K]>): () => void;
   public on<K extends keyof EventEmitt>(type: "*", callback: WildcardCallback<EventEmitt>): () => void;
