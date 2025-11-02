@@ -15,7 +15,7 @@ const setupDrag = async (name?: string) => {
 
   const instance = GridFactory.getInstance()
   const grid = await instance.waitForGrid(name)
-  grid.draggable.setupDragIn(el, { y: 10, w: 1, data: 11 })
+  grid.draggable.setupDragIn(el, { id: '23232', locked: true, y: 10, w: 5, data: 11 })
 }
 
 onMounted(() => {

@@ -1,25 +1,20 @@
 import { type GridItemOptions, type GridOptions, type DragItemOptions } from "../core";
 
+export interface GridItemProps extends GridItemOptions {
+}
+
+export interface GridDragSourceProps extends Omit<GridItemProps, 'x' | 'y'> {
+  target: string;
+}
+
 export interface GridProps extends GridOptions {
+  modelValue?: GridItemProps[];
   name: string;
   options?: GridOptions;
 }
 
-export interface GridItemProps extends GridItemOptions {
-}
-
-export interface GridDragSourceProps extends GridItemProps {
-  target: string;
-}
 
 export interface GridEmits {
-  (e: 'update:modelValue', items: GridItemOptions[]): void
-  (e: 'change', items: GridItemOptions[]): void
-  (e: 'added', items: GridItemOptions[]): void
-  (e: 'removed', item: GridItemOptions): void
-  (e: 'dragstart', item: GridItemOptions): void
-  (e: 'dragstop', item: GridItemOptions): void
-  (e: 'resizestart', item: GridItemOptions): void
-  (e: 'resizestop', item: GridItemOptions): void
-  (e: 'dropped', node: DragItemOptions<any>): void
+  (e: 'update:modelValue', items: GridItemProps[]): void
+  (e: 'dropped', item: DragItemOptions<any>): void
 }

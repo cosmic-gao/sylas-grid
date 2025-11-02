@@ -139,7 +139,12 @@ export class DragEngine {
 
         that._updateContainerHeight();
         that.engine.endUpdate();
+
+
         if (that._gsEventHandler['dropped']) {
+          delete node.el
+          delete node.grid
+          delete node._id
           that._gsEventHandler['dropped']({ ...event, type: 'dropped' }, origNode, node);
         }
       })

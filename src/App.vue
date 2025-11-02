@@ -37,7 +37,7 @@ const added = (data: any) => {
     </div>
   </GridGragSource>
 
-  <Grid name="dashboard" @added="added">
+  <Grid name="dashboard" v-model="items">
     <GridItem v-for="item in items" :key="item.id" v-bind="item">{{ item.id }}</GridItem>
   </Grid>
 </template>
