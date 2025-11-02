@@ -20,9 +20,8 @@ onMounted(() => {
   options.id = name
   context.engine = createGrid(gridRef.value, options)
 
-  context.engine.on('added', items => {
-    console.log(items)
-    emit('added', items)
+  context.engine.on('dropped', ({ node }) => {
+    emit('dropped', node)
   })
 })
 </script>

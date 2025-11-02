@@ -3,22 +3,22 @@ export type MaybePromise<T> = T | Promise<T>
 export type EventType = string | symbol;
 
 export type EventCallback<T = unknown> = (event: T) => MaybePromise<void>;
-export type WildcardCallback<E extends Record<EventType, unknown> = Record<string, unknown>> = (
+export type WildcardCallback<E extends Record<EventType, any> = Record<string, unknown>> = (
     type: keyof E,
     event: E[keyof E]
 ) => MaybePromise<void>;
 
 export type EventCallbackList<T = unknown> = Array<EventCallback<T>>;
-export type WildCardEventCallbackList<T extends Record<EventType, unknown> = Record<string, unknown>> = Array<
+export type WildCardEventCallbackList<T extends Record<EventType, any> = Record<string, unknown>> = Array<
     WildcardCallback<T>
 >;
 
-export type EventCallbackMap<E extends Record<EventType, unknown>> = Map<
+export type EventCallbackMap<E extends Record<EventType, any>> = Map<
     keyof E | '*',
     Array<EventCallback<E[keyof E]> | WildcardCallback<E>>
 >;
 
-export interface Emitter<E extends Record<EventType, unknown>> {
+export interface Emitter<E extends Record<EventType, any>> {
     all: EventCallbackMap<E>;
 
     on<K extends keyof E>(type: K, callback: EventCallback<E[K]>): () => void;
@@ -34,7 +34,7 @@ export interface Emitter<E extends Record<EventType, unknown>> {
     emit<K extends keyof E>(type: undefined extends E[K] ? K : never): void;
 }
 
-export class EventBus<E extends Record<EventType, unknown> = Record<string, unknown>> implements Emitter<E> {
+export class EventBus<E extends Record<EventType, any> = Record<string, unknown>> implements Emitter<E> {
     public all: EventCallbackMap<E> = new Map()
 
     public on<K extends keyof E>(type: K | '*', callback: EventCallback<E[K]> | WildcardCallback<E>) {

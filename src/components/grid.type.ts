@@ -1,4 +1,4 @@
-import { type GridItemOptions, type GridOptions } from "../core";
+import { type GridItemOptions, type GridOptions, type DragItemOptions } from "../core";
 
 export interface GridProps extends GridOptions {
   name: string;
@@ -21,5 +21,5 @@ export interface GridEmits {
   (e: 'dragstop', item: GridItemOptions): void
   (e: 'resizestart', item: GridItemOptions): void
   (e: 'resizestop', item: GridItemOptions): void
-  (e: 'dropped', data: any): void
+  (e: 'dropped', node: DragItemOptions<any>): void
 }

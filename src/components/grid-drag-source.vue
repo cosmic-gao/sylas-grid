@@ -5,7 +5,7 @@ import { GridFactory } from "../core"
 </script>
 
 <script setup lang="ts">
-const { target, ...options } = defineProps<GridDragSourceProps>()
+const { target } = defineProps<GridDragSourceProps>()
 
 const gragSourceRef = ref<HTMLElement>()
 
@@ -15,10 +15,7 @@ const setupDrag = async (name?: string) => {
 
   const instance = GridFactory.getInstance()
   const grid = await instance.waitForGrid(name)
-  grid.draggable.setupDragIn(el, { h: 6, data:11 } as any, () => {
-    const el = gragSourceRef.value?.cloneNode(true)
-    return el as HTMLElement
-  })
+  grid.draggable.setupDragIn(el, { y: 10, w: 1, data: 11 })
 }
 
 onMounted(() => {

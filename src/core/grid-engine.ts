@@ -3,18 +3,16 @@ import {
   type GridStackNode,
   type GridStackWidget,
   type DDDragOpt,
-  type GridHTMLElement,
-  type DDElementHost,
   type GridStackDroppedHandler,
   type GridStackEventHandler,
   type GridStackNodesHandler,
   type GridStackElementHandler,
-  GridStack as GridStackNative,
 } from "gridstack";
 import { createId } from "./create-id"
 import { microtask } from "./microtask";
-import { EventBus } from "./event-bus";
+import { type EventCallback, type WildcardCallback, EventBus } from "./event-bus";
 import { DragEngine } from "./drag-engine"
+import { GridStack } from "./grid-stack"
 
 export interface GridEngineOptions extends GridStackOptions {
   id?: string;
@@ -22,8 +20,12 @@ export interface GridEngineOptions extends GridStackOptions {
   dragIn?: string | HTMLElement[]
 }
 
-export interface GridItemOptions extends GridStackWidget {
+export interface GridItemOptions extends Omit<GridStackWidget, 'content'> {
 
+}
+
+export interface DragItemOptions<T> extends GridItemOptions {
+  data?: T
 }
 
 export interface GridItem extends GridItemOptions {
@@ -51,6 +53,10 @@ export interface GridStackEventEmitt {
   dragstop: GridStackElementHandler;
 };
 
+export interface EventEmitt {
+  dropped: { event: Event; node: DragItemOptions<any> };
+}
+
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
   window.navigator.userAgent
 );
@@ -74,35 +80,6 @@ const displayOptions = {
   float: true,
 } as const;
 
-export class GridStack extends GridStackNative {
-  public _gsEventHandler: Partial<{
-    [K in keyof GridStackEventEmitt]: GridStackEventEmitt[K];
-  }> = {};
-
-  public constructor(el: GridHTMLElement, opts: GridStackOptions = {}) {
-    super(el, opts)
-  }
-
-  public removeDD(el: DDElementHost): GridStack {
-    super._removeDD(el);
-    return this;
-  }
-
-  public readAttr(el: HTMLElement, clearDefaultAttr = true): GridStackWidget {
-    return super._readAttr(el, clearDefaultAttr);
-  }
-
-  public triggerChangeEvent(): GridStack {
-    super._triggerChangeEvent();
-    return this;
-  }
-
-  public triggerRemoveEvent(): GridStack {
-    super._triggerRemoveEvent();
-    return this;
-  }
-}
-
 export class GridEngine implements GridEngineSpec {
   private static readonly GRID_ENGINE_OPTIONS: GridEngineOptions = {
     ...displayOptions,
@@ -118,7 +95,7 @@ export class GridEngine implements GridEngineSpec {
   public draggable: DragEngine;
 
   public readonly gridstack: GridStack;
-  public readonly mitt: EventBus = new EventBus()
+  public readonly mitt: EventBus<EventEmitt> = new EventBus()
 
   private items: Map<string, GridItem> = new Map()
 
@@ -153,13 +130,14 @@ export class GridEngine implements GridEngineSpec {
     return item
   }
 
-  public on(type: string, callback: (...args: any[]) => void): () => void {
+  public on<K extends keyof EventEmitt>(type: K, callback: EventCallback<EventEmitt[K]>): () => void;
+  public on<K extends keyof EventEmitt>(type: "*", callback: WildcardCallback<EventEmitt>): () => void;
+  public on<K extends keyof EventEmitt>(type: K | "*", callback: EventCallback<EventEmitt[K]> | WildcardCallback<EventEmitt>): () => void {
     return this.mitt.on(type, callback)
   }
 
-
-  public emit(type: string, ...args: any[]): void {
-    this.mitt.emit(type, ...args)
+  public emit<K extends keyof EventEmitt>(type: K, event: EventEmitt[K]): void {
+    this.mitt.emit(type, event)
   }
 
   public destroy() {
@@ -183,8 +161,8 @@ export class GridEngine implements GridEngineSpec {
       const items = nodes.map(node => this.items.get(node.id!))
       // this.mitt.emit("added", items)
     })
-    this.gridstack.on("dropped", (_event: Event, _previousNode: GridStackNode, item: GridStackNode) => {
-      this.mitt.emit("added", [{ id: "1", x: 3, y: 0, w: 3, h: 2 }])
+    this.gridstack.on("dropped", (event: Event, _previousNode: GridStackNode, node: GridStackNode) => {
+      this.mitt.emit("dropped", { event, node })
     })
   }
 
