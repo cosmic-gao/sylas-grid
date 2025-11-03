@@ -14,12 +14,6 @@ import { type EventCallback, type WildcardCallback, EventBus } from "./event-bus
 import { DragEngine } from "./drag-engine"
 import { GridStack } from "./grid-stack"
 
-export interface GridEngineOptions extends GridStackOptions {
-  id?: string;
-  dragInOptions?: DDDragOpt;
-  dragIn?: string | HTMLElement[]
-}
-
 export interface GridItemOptions extends Omit<GridStackWidget, 'content'> {
 
 }
@@ -33,8 +27,17 @@ export interface GridItem extends GridItemOptions {
   grid: GridEngine;
 }
 
+export interface GridEngineOptions extends Omit<GridStackOptions, 'children'> {
+  id?: string;
+  dragInOptions?: DDDragOpt;
+  dragIn?: string | HTMLElement[]
+}
+
 export interface GridEngineSpec {
   readonly id: string;
+  el: HTMLElement;
+  options: GridEngineOptions;
+  driver: DragEngine;
 }
 
 export interface GridStackEventEmitt {
@@ -79,7 +82,7 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
   window.navigator.userAgent
 );
 
-const dragDropOptions = {
+const dragDropOptions: GridEngineOptions = {
   alwaysShowResizeHandle: isMobile,
   resizable: {
     autoHide: !isMobile,
@@ -87,16 +90,16 @@ const dragDropOptions = {
   },
   acceptWidgets: '.grid-drag-portal',
   dragIn: '.grid-drag-portal',  // class that can be dragged from outside
-  dragInOptions: { revert: 'invalid', scroll: true, appendTo: 'body', helper: 'clone' },
+  dragInOptions: { scroll: true, appendTo: 'body', helper: 'clone' },
   removable: '.grid-stack-library-trash', // drag-out delete class
-} as const;
+};
 
-const displayOptions = {
+const displayOptions: GridEngineOptions = {
   column: 12,
   cellHeight: 160,
   margin: 8,
   float: true,
-} as const;
+};
 
 export class GridEngine implements GridEngineSpec {
   private static readonly GRID_ENGINE_OPTIONS: GridEngineOptions = {
@@ -119,8 +122,9 @@ export class GridEngine implements GridEngineSpec {
 
   public readonly id: string;
   public readonly el: HTMLElement;
+  public readonly driver: DragEngine;
+
   public options: GridEngineOptions;
-  public draggable: DragEngine;
 
   public readonly gridstack: GridStack;
   public readonly mitt: EventBus<EventEmitt> = new EventBus()
@@ -133,11 +137,12 @@ export class GridEngine implements GridEngineSpec {
   public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
     this.el = el
     this.id = options?.id ?? createId();
+
     this.options = this.configure(options);
 
     this.gridstack = GridStack.init(this.options, this.el) as GridStack
 
-    this.draggable = new DragEngine(this)
+    this.driver = new DragEngine(this)
 
     this.setup()
   }
@@ -191,22 +196,33 @@ export class GridEngine implements GridEngineSpec {
       const items = nodes.map(node => this.items.get(node.id!))
       // this.mitt.emit("added", items)
     })
-    this.gridstack.on("dropped", (event: Event, _previousNode: GridStackNode, node: GridStackNode) => {
+    this.gridstack.on("dropped", (event: Event, previousNode: GridStackNode, node: GridStackNode) => {
       this.mitt.emit("dropped", { event, node })
     })
   }
 
+  /**
+   * Flush batched grid updates in a microtask cycle.
+   * 
+   * Ensures `gridstack.batchUpdate()` is called once per microtask,
+   * then automatically closed (`batchUpdate(false)`) after all synchronous
+   * changes finish. Prevents redundant reflows during rapid updates.
+   */
   private flush() {
-    if (!this.batching) {
-      this.gridstack.batchUpdate();
-      this.batching = true;
+    if (this.batching) return;
 
-      microtask(() => {
+    this.batching = true;
+    this.gridstack.batchUpdate();
+
+    microtask(() => {
+      try {
         this.gridstack.batchUpdate(false);
+      } finally {
         this.batching = false;
-      });
-    }
+      }
+    });
   }
+
 
   private configure(options: GridEngineOptions): GridEngineOptions {
     return { ...GridEngine.GRID_ENGINE_OPTIONS, ...options, id: this.id }
