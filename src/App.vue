@@ -5,7 +5,6 @@ import { type GridItemProps } from "./components/grid.prop"
 
 <script setup lang="ts">
 import Grid from "./components/grid.vue"
-import GridItem from "./components/grid-item.vue"
 import GridDragPortal from "./components/grid-drag-portal.vue"
 
 const items = ref<GridItemProps[]>([
@@ -31,7 +30,5 @@ const onAddWidget = () => {
     </div>
   </GridDragPortal>
 
-  <Grid name="dashboard" v-model="items">
-    <GridItem v-for="item in items" :key="item.id" v-bind="item">{{ item.id }}</GridItem>
-  </Grid>
+  <Grid name="dashboard" v-model="items" />
 </template>

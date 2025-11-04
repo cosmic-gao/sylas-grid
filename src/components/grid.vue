@@ -27,7 +27,7 @@ onMounted(() => {
   grid.value = createGrid(el.value, options)
 
   grid.value.on('dropped', ({ node }) => {
-    items.value = [...items.value, node]
+    items.value.push(node)
     emit('dropped', node)
   })
 })
@@ -43,7 +43,7 @@ onUnmounted(() => {
     <slot v-if="$slots.default"></slot>
 
     <template v-else>
-      <GridItem v-for="item in items" :key="item.id">
+      <GridItem v-for="item in items" :key="item.id" v-bind="item">
         <slot :item="item"></slot>
       </GridItem>
     </template>
