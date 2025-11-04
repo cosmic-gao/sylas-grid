@@ -121,6 +121,16 @@ export class GridEngine implements GridEngineSpec {
     }, {} as Pick<T, K>)
   }
 
+  public static getElement(els: string | HTMLElement): HTMLElement {
+    return typeof els === 'string'
+      ? document.querySelector(els) as HTMLElement
+      : els
+  }
+
+  public static getId(els: string | HTMLElement): string {
+    return typeof els === 'string' ? els : els.getAttribute('gs-id')!
+  }
+
   public readonly id: string;
   public readonly el: HTMLElement;
   public readonly driver: DragEngine;
@@ -135,8 +145,8 @@ export class GridEngine implements GridEngineSpec {
   private initialized: boolean = false
   private batching: boolean = false;
 
-  public constructor(el: HTMLElement, options: GridEngineOptions = {}) {
-    this.el = el
+  public constructor(els: string | HTMLElement, options: GridEngineOptions = {}) {
+    this.el = GridEngine.getElement(els)
     this.id = options?.id ?? createId();
 
     this.options = this.configure(options);
@@ -148,12 +158,23 @@ export class GridEngine implements GridEngineSpec {
     this.setup()
   }
 
-  public addItem(el: HTMLElement, options?: GridItemOptions): GridItem {
-    const id = options?.id ?? createId();
-    if (this.items.has(id)) return this.items.get(id)!;
+  public addItem(els: string | HTMLElement, options: GridItemOptions = {}): GridItem {
+    const el = GridEngine.getElement(els)
+
+    if (options?.id) {
+      if (this.items.has(options.id)) return this.items.get(options.id)!;
+    }
 
     this.flush()
 
+    const id = createId();
+    /**
+     * el: Existing DOM element reference (typically a `.grid-stack-item` node).
+     * 
+     * Providing `el` allows GridStack's `addWidget()` to **reuse** an existing element
+     * instead of creating a new widget container. This ensures that the original DOM
+     * structure, event bindings, and internal state are preserved.
+     */
     const finalItemOptions = { id, el, ...options } as GridStackWidget;
 
     this.gridstack.addWidget(finalItemOptions)
@@ -164,7 +185,27 @@ export class GridEngine implements GridEngineSpec {
     return item
   }
 
-  public removeItem(els: string | HTMLElement) { }
+  public removeItem(els: string | HTMLElement): boolean {
+    const id = GridEngine.getId(els)
+    if (!this.items.has(id)) return false
+
+    this.flush()
+
+    this.gridstack.removeWidget(els)
+    this.items.delete(id)
+    return true
+  }
+
+  public updateItem(els: string | HTMLElement, options: GridItemOptions = {}): false | GridItem {
+    const id = GridEngine.getId(els)
+    if (!this.items.has(id)) return false
+
+    const item = this.items.get(id)!
+    this.gridstack.update(els, options)
+
+    Object.assign(item, options)
+    return item
+  }
 
   public on<K extends keyof EventEmitt>(type: K, callback: EventCallback<EventEmitt[K]>): () => void;
   public on<K extends keyof EventEmitt>(type: "*", callback: WildcardCallback<EventEmitt>): () => void;
@@ -178,16 +219,25 @@ export class GridEngine implements GridEngineSpec {
 
   public destroy() {
     this.mitt.off("*")
-    this.gridstack.destroy(false)
+
+    if (this.gridstack) this.gridstack.destroy()
+
+    this.items.clear()
+
+    this.el.classList.remove('sylas-grid')
+    this.el.removeAttribute('data-grid-id')
+
+    this.batching = false
+    this.initialized = false
   }
 
-  private setup() {
+  public setup() {
     if (this.initialized) return
+
+    this.setupEvents()
 
     this.el.classList.add('sylas-grid')
     this.el.setAttribute('data-grid-id', this.id)
-
-    this.setupEvents()
 
     this.initialized = true
   }
