@@ -16,20 +16,20 @@ const gridItem = ref<GridItem>()
 const grid = useGrid()
 
 
-const gridAttrs = computed(() =>
-  Object.fromEntries(
-    Object.entries(GRID_ITEM_ATTRS)
-      .map(([key, attr]) => [`gs-${attr}`, props[key as keyof GridItemOptions]])
-  )
-)
-
-const properties = computed(() => ({ ...gridAttrs.value }))
+const properties = computed<Partial<GridItemOptions>>(() => {
+  const result: Partial<Record<string,any>> = {};
+  for (const key in GRID_ITEM_ATTRS) {
+    const value = props[key] as any;
+    if (value !== undefined) result[GRID_ITEM_ATTRS[key as keyof typeof GRID_ITEM_ATTRS]] = value;
+  }
+  return result;
+});
 
 watch(
   () => GridEngine.pick(props, GRID_ITEM_KEYS),
   (options) => {
     if (!el.value || !grid.value) return
-    grid.value.gridstack.update(el.value, options);
+    grid.value.updateItem(el.value, options);
   },
   { flush: 'post' }
 )

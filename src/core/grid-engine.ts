@@ -121,6 +121,14 @@ export class GridEngine implements GridEngineSpec {
     }, {} as Pick<T, K>)
   }
 
+  public static trimmed<T extends Record<string, any>>(obj: T): Partial<T> {
+    const result = {} as Partial<T>;
+    for (const key in obj) {
+      if (obj[key] !== undefined) result[key] = obj[key];
+    }
+    return result;
+  }
+
   public static getElement(els: string | HTMLElement): HTMLElement {
     return typeof els === 'string'
       ? document.querySelector(els) as HTMLElement
@@ -175,7 +183,7 @@ export class GridEngine implements GridEngineSpec {
      * instead of creating a new widget container. This ensures that the original DOM
      * structure, event bindings, and internal state are preserved.
      */
-    const finalItemOptions = { id, el, ...options } as GridStackWidget;
+    const finalItemOptions = { id, el, ...GridEngine.trimmed(options) } as GridStackWidget;
 
     this.gridstack.addWidget(finalItemOptions)
 
@@ -200,10 +208,13 @@ export class GridEngine implements GridEngineSpec {
     const id = GridEngine.getId(els)
     if (!this.items.has(id)) return false
 
+    this.flush()
+
     const item = this.items.get(id)!
+    const finalOptions = GridEngine.trimmed(options)
     this.gridstack.update(els, options)
 
-    Object.assign(item, options)
+    Object.assign(item, finalOptions)
     return item
   }
 
