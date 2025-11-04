@@ -3,7 +3,7 @@ import { computed, watch, onMounted, onUnmounted, ref, useTemplateRef } from 'vu
 import { type GridItemProps } from './grid.prop';
 import { GRID_ITEM_KEYS } from "./grid.const"
 import { useGrid } from "./grid.context"
-import { type GridItem, type GridItemOptions, GRID_ITEM_ATTRS, GridEngine } from "../core"
+import { type GridItem, GRID_ITEM_ATTRS, GridEngine } from "../core"
 </script>
 
 <script setup lang="ts">
@@ -15,15 +15,13 @@ const gridItem = ref<GridItem>()
 
 const grid = useGrid()
 
-
-const properties = computed<Partial<GridItemOptions>>(() => {
-  const result: Partial<Record<string,any>> = {};
-  for (const key in GRID_ITEM_ATTRS) {
-    const value = props[key] as any;
-    if (value !== undefined) result[GRID_ITEM_ATTRS[key as keyof typeof GRID_ITEM_ATTRS]] = value;
-  }
-  return result;
-});
+const properties = computed(() =>
+  Object.fromEntries(
+    (Object.entries(GRID_ITEM_ATTRS) as [keyof typeof props, string][])
+      .filter(([_, v]) => v !== undefined)
+      .map(([key, attr]) => [`gs-${attr}`, props[key]])
+  )
+);
 
 watch(
   () => GridEngine.pick(props, GRID_ITEM_KEYS),

@@ -18,6 +18,7 @@ export interface GridItemOptions extends Omit<GridStackWidget, 'content'> {
 
 }
 
+
 export interface DragItemOptions<T> extends GridItemOptions {
   data?: T
 }
@@ -121,8 +122,8 @@ export class GridEngine implements GridEngineSpec {
     }, {} as Pick<T, K>)
   }
 
-  public static trimmed<T extends Record<string, any>>(obj: T): Partial<T> {
-    const result = {} as Partial<T>;
+  public static trimmed<T extends GridItemOptions>(obj: T): Partial<T> {
+    const result = {} as T;
     for (const key in obj) {
       if (obj[key] !== undefined) result[key] = obj[key];
     }

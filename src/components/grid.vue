@@ -1,8 +1,9 @@
 <script lang="ts">
-import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef } from "vue";
+import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef, onUnmounted } from "vue";
 import { type GridEmits, type GridProps, type GridItemProps } from "./grid.prop"
 import { provideGrid } from "./grid.context"
 import { type GridEngine, createGrid } from "../core"
+import GridItem from "./grid-item.vue"
 </script>
 
 <script setup lang="ts">
@@ -30,11 +31,22 @@ onMounted(() => {
     emit('dropped', node)
   })
 })
+
+onUnmounted(() => {
+  if (!el.value || !grid.value) return
+  grid.value.destroy()
+})
 </script>
 
 <template>
   <div ref="sylas-grid" class="grid-stack sylas-grid-vue">
-    <slot></slot>
+    <slot v-if="$slots.default"></slot>
+
+    <template v-else>
+      <GridItem v-for="item in items" :key="item.id">
+        <slot :item="item"></slot>
+      </GridItem>
+    </template>
   </div>
 </template>
 
