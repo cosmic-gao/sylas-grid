@@ -58,6 +58,7 @@ export interface GridStackEventEmitt {
 
 export interface EventEmitt {
   dropped: { event: Event; node: DragItemOptions<any> };
+  added: { event: Event; nodes: GridItemOptions[] };
 }
 
 export const GRID_ITEM_ATTRS = {
@@ -192,11 +193,10 @@ export class GridEngine implements GridEngineSpec {
   }
 
   private setupEvents() {
-    this.gridstack.on("added", (_event: Event, nodes: GridStackNode[]) => {
-      const items = nodes.map(node => this.items.get(node.id!))
-      // this.mitt.emit("added", items)
+    this.gridstack.on("added", (event: Event, nodes: GridStackNode[]) => {
+      this.mitt.emit("added", { event, nodes })
     })
-    this.gridstack.on("dropped", (event: Event, previousNode: GridStackNode, node: GridStackNode) => {
+    this.gridstack.on("dropped", (event: Event, _previousNode: GridStackNode, node: GridStackNode) => {
       this.mitt.emit("dropped", { event, node })
     })
   }

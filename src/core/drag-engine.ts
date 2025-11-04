@@ -19,7 +19,7 @@ export class DragEngine {
   }
 
   public destroyDragIn(element: HTMLElement): DDGridStack {
-    return GridStack.getDD().draggable(element, 'destroy')
+    return this.getDD().draggable(element, 'destroy')
   }
 
   public setupDragIn<T>(element: HTMLElement, item: DragItemOptions<T>, helper?: 'clone' | ((el: HTMLElement) => HTMLElement)) {

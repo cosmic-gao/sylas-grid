@@ -17,7 +17,7 @@ const setupDrag = async (name?: string) => {
 
     const instance = GridFactory.getInstance()
     grid.value = await instance.waitForGrid(name)
-    if (grid.value) grid.value.draggable.setupDragIn(dom, options)
+    if (grid.value) grid.value.driver.setupDragIn(dom, options)
 }
 
 watch(
@@ -28,7 +28,7 @@ watch(
 onMounted(() => setupDrag(target))
 
 onUnmounted(() => {
-    if (grid.value) grid.value.draggable.destroyDragIn(el.value!)
+    if (grid.value) grid.value.driver.destroyDragIn(el.value!)
 })
 </script>
 
