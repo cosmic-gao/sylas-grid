@@ -7,6 +7,7 @@ import {
   type GridStackEventHandler,
   type GridStackNodesHandler,
   type GridStackElementHandler,
+  type GridItemHTMLElement
 } from "gridstack";
 import { createId } from "./create-id"
 import { microtask } from "./microtask";
@@ -134,6 +135,11 @@ export class GridEngine implements GridEngineSpec {
       : els
   }
 
+  public static isElement(els: string | HTMLElement): boolean {
+    const el = GridEngine.getElement(els) as GridItemHTMLElement;
+    return !!el.gridstackNode
+  }
+
   public static getId(els: string | HTMLElement): string {
     return typeof els === 'string' ? els : els.getAttribute('gs-id')!
   }
@@ -168,26 +174,15 @@ export class GridEngine implements GridEngineSpec {
   public addItem(els: string | HTMLElement, options: GridItemOptions = {}): GridItem {
     const el = GridEngine.getElement(els)
 
-    if (options?.id) {
-      if (this.items.has(options.id)) return this.items.get(options.id)!;
+    if (options.id && this.items.has(options.id)) {
+      return this.items.get(options.id)!;
     }
 
     this.flush()
 
-    const id = createId();
-    /**
-     * el: Existing DOM element reference (typically a `.grid-stack-item` node).
-     * 
-     * Providing `el` allows GridStack's `addWidget()` to **reuse** an existing element
-     * instead of creating a new widget container. This ensures that the original DOM
-     * structure, event bindings, and internal state are preserved.
-     */
-    const finalItemOptions = { id, el, ...GridEngine.trimmed(options) } as GridStackWidget;
-
-    this.gridstack.addWidget(finalItemOptions)
-
-    const item = { ...finalItemOptions, grid: this } as unknown as GridItem
-    this.items.set(id, item)
+    const item = this.createItem(el, options, options.id);
+    this.gridstack.addWidget(item)
+    this.items.set(item.id!, item);
 
     return item
   }
@@ -205,17 +200,21 @@ export class GridEngine implements GridEngineSpec {
 
   public updateItem(els: string | HTMLElement, options: GridItemOptions = {}): false | GridItem {
     const id = GridEngine.getId(els)
-    console.log(id, this.items, "asdasd")
-    if (!this.items.has(id)) return false
+
+    let item = this.items.get(id) ?? null;
+    if (!item) {
+      const el = GridEngine.getElement(els) as GridItemHTMLElement
+      if (!el.gridstackNode) return false
+
+      item = this.createItem(el, options, id)
+    }
 
     this.flush()
 
-    const item = this.items.get(id)!
-    const finalOptions = GridEngine.trimmed(options)
-    console.log(finalOptions, "finalOptions")
-    this.gridstack.update(els, finalOptions)
+    const { el, grid, ...opts } = item
+    this.gridstack.update(els, opts)
+    this.items.has(id) ? Object.assign(item, opts) : this.items.set(id, item!)
 
-    Object.assign(item, finalOptions)
     return item
   }
 
@@ -229,9 +228,20 @@ export class GridEngine implements GridEngineSpec {
     this.mitt.emit(type, event)
   }
 
+  public setup() {
+    if (this.initialized) return
+
+    this.setupEvents()
+
+    this.el.classList.add('sylas-grid')
+    this.el.setAttribute('data-grid-id', this.id)
+
+
+    this.initialized = true
+  }
+
   public destroy() {
     this.mitt.off("*")
-
     if (this.gridstack) this.gridstack.destroy()
 
     this.items.clear()
@@ -243,17 +253,6 @@ export class GridEngine implements GridEngineSpec {
     this.initialized = false
   }
 
-  public setup() {
-    if (this.initialized) return
-
-    this.setupEvents()
-
-    this.el.classList.add('sylas-grid')
-    this.el.setAttribute('data-grid-id', this.id)
-
-    this.initialized = true
-  }
-
   private setupEvents() {
     this.gridstack.on("added", (event: Event, nodes: GridStackNode[]) => {
       this.mitt.emit("added", { event, nodes })
@@ -261,6 +260,19 @@ export class GridEngine implements GridEngineSpec {
     this.gridstack.on("dropped", (event: Event, _previousNode: GridStackNode, node: GridStackNode) => {
       this.mitt.emit("dropped", { event, node })
     })
+  }
+
+  /**
+  * el: Existing DOM element reference (typically a `.grid-stack-item` node).
+  * 
+  * Providing `el` allows GridStack's `addWidget()` to **reuse** an existing element
+  * instead of creating a new widget container. This ensures that the original DOM
+  * structure, event bindings, and internal state are preserved.
+  */
+  private createItem(el: HTMLElement, options: GridItemOptions, id?: string): GridItem {
+    const finalId = id ?? createId();
+    const finalOptions = { id: finalId, el, ...GridEngine.trimmed(options) } as GridStackWidget;
+    return { ...finalOptions, grid: this } as unknown as GridItem;
   }
 
   /**
@@ -278,13 +290,13 @@ export class GridEngine implements GridEngineSpec {
 
     microtask(() => {
       try {
+        console.log('flush')
         this.gridstack.batchUpdate(false);
       } finally {
         this.batching = false;
       }
     });
   }
-
 
   private configure(options: GridEngineOptions): GridEngineOptions {
     return { ...GridEngine.GRID_ENGINE_OPTIONS, ...options, id: this.id }

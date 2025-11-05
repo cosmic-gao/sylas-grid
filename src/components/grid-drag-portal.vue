@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMounted, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue';
+import { onMounted, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue';
 import { type GridDragPortalProps } from "./grid.type"
 import { type GridEngine, GridFactory } from "../core"
 </script>
@@ -27,7 +27,7 @@ watch(
 
 onMounted(() => setupDrag(target))
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
     if (grid.value) grid.value.driver.destroyDragIn(el.value!)
 })
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, watch, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
+import { computed, watch, onMounted, onBeforeUnmount, ref, useTemplateRef } from 'vue';
 import { type GridItemProps } from './grid.type';
 import { GRID_ITEM_KEYS } from "./grid.const"
 import { useGrid } from "./grid.context"
@@ -53,7 +53,7 @@ onMounted(() => {
   gridItem.value = grid.value.addItem(el.value, props)
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   if (!el.value || !grid.value) return
   grid.value.removeItem(el.value)
 })

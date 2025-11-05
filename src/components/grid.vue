@@ -1,5 +1,5 @@
 <script lang="ts">
-import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef, onUnmounted } from "vue";
+import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef, onBeforeUnmount } from "vue";
 import { type GridEmits, type GridProps, type GridItemProps } from "./grid.type"
 import { provideGrid } from "./grid.context"
 import GridItem from "./grid-item.vue"
@@ -31,7 +31,7 @@ onMounted(() => {
   })
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   if (grid.value) grid.value.destroy()
 })
 </script>

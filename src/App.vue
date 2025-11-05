@@ -17,7 +17,9 @@ const onAddWidget = () => {
 
 setTimeout(()=>{
 (items.value[0]!).w = 6
-console.log(items.value)
+Array.from({length: 100}).forEach(item => {
+  items.value.push({x: 3, y: 0, w: 3, h: 2})
+})
 }, 5000)
 </script>
 
