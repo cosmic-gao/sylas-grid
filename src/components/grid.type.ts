@@ -1,6 +1,7 @@
 import { type GridItemOptions, type GridOptions, type DragItemOptions } from "../core";
 
 export interface GridItemProps extends GridItemOptions {
+  nested?: boolean;
 }
 
 export interface GridDragPortalProps extends Omit<GridItemProps, 'x' | 'y'> {
@@ -11,6 +12,7 @@ export interface GridProps extends GridOptions {
   modelValue?: GridItemProps[];
   name: string;
   options?: GridOptions;
+  nested?: boolean;
 }
 
 

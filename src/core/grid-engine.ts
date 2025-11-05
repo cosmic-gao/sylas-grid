@@ -15,10 +15,23 @@ import { type EventCallback, type WildcardCallback, EventBus } from "./event-bus
 import { DragEngine } from "./drag-engine"
 import { GridStack } from "./grid-stack"
 
-export interface GridItemOptions extends Omit<GridStackWidget, 'content'> { }
+export interface GridItemOptions extends Omit<GridStackWidget, 'content'> {
+  children?: GridItemOptions[]
+}
 
 
 export interface DragItemOptions<T> extends GridItemOptions {
+  /**
+  * Optional payload data associated with the item when dragging it
+  * from an external source into the grid.
+  * 
+  * This can be any custom information you want to attach, such as:
+  * - item id
+  * - type or category
+  * - metadata for rendering
+  * 
+  * The generic type `T` ensures type safety for the attached data.
+  */
   data?: T
 }
 
@@ -100,6 +113,7 @@ const displayOptions: GridEngineOptions = {
   cellHeight: 160,
   margin: 8,
   float: true,
+  sizeToContent: true,
 };
 
 export class GridEngine implements GridEngineSpec {
@@ -181,7 +195,7 @@ export class GridEngine implements GridEngineSpec {
     this.flush()
 
     const item = this.createItem(el, options, options.id);
-    this.gridstack.addWidget(item)
+    this.gridstack.addWidget(item);
     this.items.set(item.id!, item);
 
     return item
@@ -242,7 +256,7 @@ export class GridEngine implements GridEngineSpec {
 
   public destroy() {
     this.mitt.off("*")
-    
+
     if (this.gridstack) this.gridstack.destroy()
 
     this.items.clear()
@@ -291,7 +305,6 @@ export class GridEngine implements GridEngineSpec {
 
     microtask(() => {
       try {
-        console.log('flush')
         this.gridstack.batchUpdate(false);
       } finally {
         this.batching = false;

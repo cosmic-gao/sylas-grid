@@ -3,6 +3,7 @@ import { computed, watch, onMounted, onBeforeUnmount, ref, useTemplateRef } from
 import { type GridItemProps } from './grid.type';
 import { GRID_ITEM_KEYS } from "./grid.const"
 import { useGrid } from "./grid.context"
+import SubGrid from "./grid.vue"
 import { type GridItem, GRID_ITEM_ATTRS, GridEngine } from "../core"
 </script>
 
@@ -20,6 +21,8 @@ const properties = computed(() =>
       .map(([key, attr]) => [`gs-${attr}`, props[key]])
   )
 );
+
+const isNested = computed(() => props.children && props.children.length > 0)
 
 watch(
   () => GridEngine.pick(props, GRID_ITEM_KEYS),
@@ -60,9 +63,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="grid-item" class="grid-stack-item sylas-grid-item" v-bind="properties">
+  <div ref="grid-item" class="grid-stack-item sylas-grid-item" :class="[nested && 'grid-stack-item-nested']"
+    v-bind="properties">
     <div class="grid-stack-item-content sylas-grid-item-content">
-      <slot></slot>
+      <slot v-if="!isNested"></slot>
+
+      <SubGrid v-else name="test" :model-value="children" />
     </div>
   </div>
 </template>

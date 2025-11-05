@@ -37,7 +37,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="sylas-grid" class="grid-stack sylas-grid-vue">
+  <div ref="sylas-grid" class="grid-stack sylas-grid-vue" :class="[nested && 'grid-stack-nested']">
     <slot v-if="$slots.default"></slot>
 
     <template v-else>
@@ -45,6 +45,7 @@ onBeforeUnmount(() => {
         <slot :item="item"></slot>
       </GridItem>
     </template>
+
   </div>
 </template>
 
