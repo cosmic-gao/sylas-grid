@@ -14,9 +14,7 @@ import { type EventCallback, type WildcardCallback, EventBus } from "./event-bus
 import { DragEngine } from "./drag-engine"
 import { GridStack } from "./grid-stack"
 
-export interface GridItemOptions extends Omit<GridStackWidget, 'content'> {
-
-}
+export interface GridItemOptions extends Omit<GridStackWidget, 'content'> { }
 
 
 export interface DragItemOptions<T> extends GridItemOptions {
@@ -207,13 +205,15 @@ export class GridEngine implements GridEngineSpec {
 
   public updateItem(els: string | HTMLElement, options: GridItemOptions = {}): false | GridItem {
     const id = GridEngine.getId(els)
+    console.log(id, this.items, "asdasd")
     if (!this.items.has(id)) return false
 
     this.flush()
 
     const item = this.items.get(id)!
     const finalOptions = GridEngine.trimmed(options)
-    this.gridstack.update(els, options)
+    console.log(finalOptions, "finalOptions")
+    this.gridstack.update(els, finalOptions)
 
     Object.assign(item, finalOptions)
     return item

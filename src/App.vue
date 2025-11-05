@@ -1,6 +1,6 @@
 <script lang="ts">
 import { ref } from "vue";
-import { type GridItemProps } from "./components/grid.prop"
+import { type GridItemProps } from "./components/grid.type"
 </script>
 
 <script setup lang="ts">
@@ -14,6 +14,11 @@ const items = ref<GridItemProps[]>([
 const onAddWidget = () => {
   items.value.push({ id: "1", x: 3, y: 0, w: 3, h: 2 })
 }
+
+setTimeout(()=>{
+(items.value[0]!).w = 6
+console.log(items.value)
+}, 5000)
 </script>
 
 <template>

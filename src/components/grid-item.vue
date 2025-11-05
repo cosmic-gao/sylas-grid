@@ -1,6 +1,6 @@
 <script lang="ts">
 import { computed, watch, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
-import { type GridItemProps } from './grid.prop';
+import { type GridItemProps } from './grid.type';
 import { GRID_ITEM_KEYS } from "./grid.const"
 import { useGrid } from "./grid.context"
 import { type GridItem, GRID_ITEM_ATTRS, GridEngine } from "../core"
@@ -10,14 +10,12 @@ import { type GridItem, GRID_ITEM_ATTRS, GridEngine } from "../core"
 const props = defineProps<GridItemProps>();
 
 const el = useTemplateRef<HTMLElement>('grid-item')
-
 const gridItem = ref<GridItem>()
-
 const grid = useGrid()
 
 const properties = computed(() =>
   Object.fromEntries(
-    (Object.entries(GRID_ITEM_ATTRS) as [keyof typeof props, string][])
+    (Object.entries(GRID_ITEM_ATTRS) as [keyof GridItemProps, string][])
       .filter(([_, v]) => v !== undefined)
       .map(([key, attr]) => [`gs-${attr}`, props[key]])
   )

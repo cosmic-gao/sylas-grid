@@ -1,9 +1,9 @@
 <script lang="ts">
 import { type ShallowRef, onMounted, computed, useTemplateRef, shallowRef, onUnmounted } from "vue";
-import { type GridEmits, type GridProps, type GridItemProps } from "./grid.prop"
+import { type GridEmits, type GridProps, type GridItemProps } from "./grid.type"
 import { provideGrid } from "./grid.context"
-import { type GridEngine, createGrid } from "../core"
 import GridItem from "./grid-item.vue"
+import { type GridEngine, createGrid } from "../core"
 </script>
 
 <script setup lang="ts">
@@ -11,20 +11,19 @@ const { name, modelValue, options = {} } = defineProps<GridProps>()
 const emit = defineEmits<GridEmits>()
 
 const el = useTemplateRef<HTMLElement>('sylas-grid')
+const grid = shallowRef() as ShallowRef<GridEngine>
+provideGrid(grid)
 
 const items = computed<GridItemProps[]>({
   get: () => modelValue ?? [],
   set: (value) => emit('update:modelValue', value),
 })
 
-const grid = shallowRef() as ShallowRef<GridEngine>
-provideGrid(grid)
-
 onMounted(() => {
   if (!el.value) return
 
-  options.id = name
-  grid.value = createGrid(el.value, options)
+  const finalOptions = { ...options, id: name }
+  grid.value = createGrid(el.value, finalOptions)
 
   grid.value.on('dropped', ({ node }) => {
     items.value.push(node)
@@ -33,8 +32,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (!el.value || !grid.value) return
-  grid.value.destroy()
+  if (grid.value) grid.value.destroy()
 })
 </script>
 

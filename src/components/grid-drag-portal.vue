@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMounted, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue';
-import { type GridDragPortalProps } from "./grid.prop"
+import { type GridDragPortalProps } from "./grid.type"
 import { type GridEngine, GridFactory } from "../core"
 </script>
 
