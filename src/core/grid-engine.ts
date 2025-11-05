@@ -242,6 +242,7 @@ export class GridEngine implements GridEngineSpec {
 
   public destroy() {
     this.mitt.off("*")
+    
     if (this.gridstack) this.gridstack.destroy()
 
     this.items.clear()

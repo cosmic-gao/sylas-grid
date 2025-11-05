@@ -76,7 +76,15 @@ export class DragEngine {
         const node = helper?.gridstackNode || el.gridstackNode;
         if (!node) return false;
 
-        if (!node?.grid || node?.grid === that) {
+        /**
+         * fix #1578 when dragging fast, we might get leave after another grid gets enter (which calls us to clean)
+         * so skip this one if we're not the active grid really..
+
+         * note: issue #3178 shows this can still happen when there's only a single grid-stack-item.
+         * in that case, the dropout may remove the node even though it's from the same grid instance,
+         * causing grid height to collapse (row = 0). temporary local fix applied until upstream patch.
+         */
+        if (!node?.grid || node?.grid !== that) {
           that._leave(el, helper);
 
           if (that._isTemp) {
