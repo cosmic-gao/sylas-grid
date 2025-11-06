@@ -8,7 +8,7 @@ import Grid from "./components/grid.vue"
 import GridDragPortal from "./components/grid-drag-portal.vue"
 
 const items = ref<GridItemProps[]>([
-  { id: "0", x: 0, y: 0, w: 2, h: 2, minW: 1, children: [{ x: 0, y: 0, w: 2, h: 2, minW: 1 }] }
+  { id: "0", x: 0, y: 0, w: 2, h: 2, minW: 1, subGridOpts: { acceptWidgets: '.grid-stack-item.grid-stack-item-nested' }, children: [{ id: "1", x: 0, y: 0, w: 12, h: 2, minW: 1 }] }
 ])
 
 const onAddWidget = () => {
@@ -34,6 +34,7 @@ setTimeout(() => {
     </div>
   </GridDragPortal>
 
-  <Grid name="dashboard" :options="{ subGridOpts: { acceptWidgets: '.grid-stack-item.grid-stack-item-nested' } }"
+  <Grid name="dashboard"
+    :options="{ subGridOpts: { cellHeight: 50, subGridDynamic: true, acceptWidgets: '.grid-stack-item.grid-stack-item-nested' } }"
     v-model="items" />
 </template>

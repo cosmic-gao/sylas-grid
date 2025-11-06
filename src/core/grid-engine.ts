@@ -177,7 +177,6 @@ export class GridEngine implements GridEngineSpec {
     this.id = options?.id ?? createId();
 
     this.options = this.configure(options);
-
     this.gridstack = GridStack.init(this.options, this.el) as GridStack
 
     this.driver = new DragEngine(this)
